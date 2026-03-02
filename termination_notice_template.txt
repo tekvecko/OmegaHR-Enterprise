@@ -1,0 +1,20 @@
+VÝPOVĚĎ Z PRACOVNÍHO POMĚRU
+dle § 52 zákona č. 262/2006 Sb., zákoník práce
+
+Zaměstnavatel: {company_name}
+IČO: {company_id}
+Sídlo: {company_address}
+
+Zaměstnanec: {name}
+Datum narození: {birthdate}
+Trvale bytem: {address}
+
+Věc: Výpověď z pracovního poměru
+
+Tímto Vám dáváme výpověď z pracovního poměru.
+Pracovní poměr skončí uplynutím výpovědní doby v délce 2 měsíců. Výpovědní doba začíná běžet prvním dnem kalendářního měsíce následujícího po doručení této výpovědi. Současně Vás vyzýváme k vrácení veškerého svěřeného firemního majetku.
+
+V ___________________ dne {date}
+
+________________________               ________________________
+Za Zaměstnavatele                      Převzal(a) Zaměstnanec

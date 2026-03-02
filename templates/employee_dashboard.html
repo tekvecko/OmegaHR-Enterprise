@@ -31,9 +31,17 @@
 {% endif %}
 
 <div class="grid grid-cols-2 gap-4">
-    <a href="/download/{{ c.filename }}" class="bg-white p-5 rounded-3xl shadow-sm flex flex-col items-center justify-center gap-3 aspect-square active:scale-95 transition">
+    <a href="/download/{{ c.filename }}" class="bg-white p-5 rounded-3xl shadow-sm flex flex-col items-center justify-center gap-3 aspect-square active:scale-95 transition border border-gray-100">
         <div class="w-14 h-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center text-2xl"><i class="ri-file-pdf-2-fill"></i></div>
-        <span class="text-xs font-bold text-gray-700">Contract</span>
+        <span class="text-xs font-bold text-gray-700">Smlouva</span>
+    </a>
+    <a href="/download/nda_{{ c.token }}.pdf" class="bg-white p-5 rounded-3xl shadow-sm flex flex-col items-center justify-center gap-3 aspect-square active:scale-95 transition border border-gray-100">
+        <div class="w-14 h-14 bg-brand-gold/10 text-brand-gold rounded-2xl flex items-center justify-center text-2xl"><i class="ri-lock-fill"></i></div>
+        <span class="text-xs font-bold text-gray-700">NDA</span>
+    </a>
+    <a href="/download/handover_{{ c.token }}.pdf" class="bg-white p-5 rounded-3xl shadow-sm flex flex-col items-center justify-center gap-3 aspect-square active:scale-95 transition border border-gray-100">
+        <div class="w-14 h-14 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center text-2xl"><i class="ri-macbook-line"></i></div>
+        <span class="text-xs font-bold text-gray-700">Protokol</span>
     </a>
 </div>
 {% endblock %}

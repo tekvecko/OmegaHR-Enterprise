@@ -1,0 +1,39 @@
+PŘEDÁVACÍ PROTOKOL O SVĚŘENÍ FIREMNÍHO MAJETKU
+dle § 255 a násl. zákona č. 262/2006 Sb., zákoník práce
+
+I. Smluvní strany
+
+1. Zaměstnavatel: {company_name}
+   (dále jen "Zaměstnavatel") a
+
+2. Zaměstnanec: {name}
+   Pozice: {position}
+   (dále jen "Zaměstnanec")
+
+II. Předmět předání
+
+Zaměstnavatel tímto předává a Zaměstnanec fyzicky přebírá do svého výlučného osobního užívání pro účely plnění pracovních úkolů následující majetek Zaměstnavatele:
+
+1. Výpočetní technika (Notebook)
+   Typ / Model: Firemní standard (bude specifikováno IT oddělením v interním systému)
+   Příslušenství: Napájecí adaptér, brašna/pouzdro.
+
+2. Mobilní zařízení a komunikace
+   Typ / Model: Firemní smartphone
+   SIM karta s přiděleným telefonním číslem a datovým tarifem.
+
+3. Přístupové a identifikační prostředky
+   Elektronický přístupový čip / karta do budovy Zaměstnavatele.
+   Fyzické klíče (pokud byly vydány pro konkrétní kancelář).
+
+III. Prohlášení a odpovědnost Zaměstnance
+
+1. Zaměstnanec potvrzuje, že výše uvedený majetek převzal ve stavu způsobilém k řádnému užívání a neshledal na něm žádné zjevné vady či poškození.
+2. Zaměstnanec se zavazuje pečovat o svěřený majetek s péčí řádného hospodáře, chránit jej před poškozením, ztrátou, odcizením či zničením.
+3. Zaměstnanec bere na vědomí, že odpovídá za ztrátu svěřených předmětů ve smyslu § 255 Zákoníku práce. V případě ztráty či úmyslného poškození je povinen nahradit škodu v plné výši.
+4. Zaměstnanec se zavazuje vrátit veškerý svěřený majetek neprodleně při ukončení pracovního poměru, nebo kdykoli na výzvu Zaměstnavatele.
+
+V ___________________ dne {date}
+
+________________________               ________________________
+Předal (Za Zaměstnavatele)             Převzal (Zaměstnanec)

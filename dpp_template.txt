@@ -1,0 +1,36 @@
+DOHODA O PROVEDENÍ PRÁCE
+uzavřená dle § 75 a násl. zákona č. 262/2006 Sb., zákoník práce, ve znění pozdějších předpisů
+
+I. Smluvní strany
+
+1. Zaměstnavatel: {company_name}
+   se sídlem: {company_address}
+   (dále jen "Zaměstnavatel") a
+
+2. Zaměstnanec: {name}
+   Datum narození: {birthdate}
+   bytem: {address}
+   (dále jen "Zaměstnanec")
+
+II. Předmět dohody
+
+1. Zaměstnanec se zavazuje provést pro Zaměstnavatele následující pracovní úkol / vykonávat následující práce: {position}.
+2. Rozsah práce nepřekročí zákonný limit 300 hodin v kalendářním roce.
+3. Místem výkonu práce je sídlo Zaměstnavatele.
+
+III. Doba trvání a Odměna
+
+1. Tato dohoda se uzavírá na dobu určitou, ode dne {date} do 31.12. daného kalendářního roku.
+2. Za řádně provedenou práci náleží Zaměstnanci odměna ve výši: {salary} Kč / hod.
+3. Odměna je splatná v pravidelných výplatních termínech Zaměstnavatele po odevzdání výkazu práce.
+
+IV. Závěrečná ustanovení
+
+1. Práva a povinnosti stran výslovně neupravené touto dohodou se řídí příslušnými ustanoveními zákoníku práce.
+2. Tato dohoda je vyhotovena ve dvou stejnopisech.
+
+V ___________________ dne {date}
+
+________________________               ________________________
+Podpis Zaměstnavatele                  Podpis Zaměstnance
+(Zajištěno elektronicky, ID Smlouvy: {token})

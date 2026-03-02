@@ -28,6 +28,10 @@
     <h3 class="font-bold mb-4 text-brand-dark"><i class="ri-user-add-line text-brand-gold mr-2"></i>Manual Entry</h3>
     <form action="/new" method="POST" class="space-y-3">
         <input name="name" placeholder="Full Name" class="w-full bg-gray-50 border-none p-3 rounded-xl outline-none">
+        <select name="contract_type" class="w-full bg-gray-50 border-none p-3 rounded-xl outline-none text-gray-600">
+            <option value="hpp">HPP (Pracovní smlouva)</option>
+            <option value="dpp">DPP (Dohoda o provedení práce)</option>
+        </select>
         <input name="position" placeholder="Position" class="w-full bg-gray-50 border-none p-3 rounded-xl outline-none">
         <input name="salary" placeholder="Salary" type="number" class="w-full bg-gray-50 border-none p-3 rounded-xl outline-none">
         <button class="w-full bg-brand-dark text-white py-3 rounded-xl font-bold shadow-md">Create Profile</button>

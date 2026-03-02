@@ -92,7 +92,7 @@ def fix_data(c):
 def gen_pdf(token, type='contract'):
     try:
         c = fix_data(db.get_candidate(token))
-        comp = get_sys_config()
+        comp = load_settings()
         pdf = FPDF(); pdf.add_page()
         
         font_path = os.path.join(cfg.BASE_DIR, 'Roboto-Regular.ttf')
@@ -105,7 +105,15 @@ def gen_pdf(token, type='contract'):
             except: pass
         if not loaded: pdf.set_font("Arial", size=12)
 
-        t_file = "contract_template.txt" if type == 'contract' else "termination_template.txt"
+        c_type = c.get('hr_data', {}).get('contract_type', 'hpp')
+        if type == 'contract':
+            t_file = "dpp_template.txt" if c_type == 'dpp' else "contract_template.txt"
+        elif type == 'nda':
+            t_file = "nda_template.txt"
+        elif type == 'handover':
+            t_file = "handover_template.txt"
+        else:
+            t_file = "termination_template.txt"
         content = ""
         if os.path.exists(t_file):
             try:
@@ -145,7 +153,7 @@ def dash():
     stats = {'total': len(cands)}
     return render_template('dashboard.html', cands=cands, stats=stats, role=session.get('role'))
 
-@app.route('/login')
+@app.route('/login_old_disabled')
 def login_page(): return render_template('login.html', error=request.args.get('error'))
 
 @app.route('/auth/internal', methods=['POST'])
@@ -169,7 +177,7 @@ def logout(): session.clear(); return redirect('/login')
 def new():
     if not is_staff(): return "403"
     tk = uuid.uuid4().hex[:8]
-    data = {"salary": request.form.get('salary'), "position": request.form.get('position')}
+    data = {"salary": request.form.get('salary'), "position": request.form.get('position'), "contract_type": request.form.get('contract_type', 'hpp')}
     db.upsert_candidate(tk, {"name": request.form.get('name'), "hr_data": encrypt_data(data)})
     gen_pdf(tk)
     return redirect('/')
@@ -193,6 +201,12 @@ def detail(token):
     c['filename'] = f"contract_{token}.pdf"
     if not os.path.exists(os.path.join(cfg.CONTRACTS_DIR, c['filename'])): gen_pdf(token, 'contract')
     c['term_filename'] = f"termination_{token}.pdf"
+    
+    c['nda_filename'] = f"nda_{token}.pdf"
+    if not os.path.exists(os.path.join(cfg.CONTRACTS_DIR, c['nda_filename'])): gen_pdf(token, 'nda')
+        
+    c['handover_filename'] = f"handover_{token}.pdf"
+    if not os.path.exists(os.path.join(cfg.CONTRACTS_DIR, c['handover_filename'])): gen_pdf(token, 'handover')
     
     conn = db.get_conn(); cur = conn.cursor()
     cur.execute("SELECT * FROM evaluations WHERE user_token=?", (token,))
@@ -231,6 +245,8 @@ def confirm_data():
         conn.execute("UPDATE candidates SET full_name_mojeid=?, birthdate_mojeid=?, is_verified=1, status='signed' WHERE token=?", (data['name'], data['birthdate'], target))
         conn.commit(); conn.close()
         gen_pdf(target, 'contract')
+        gen_pdf(target, 'nda')
+        gen_pdf(target, 'handover')
         session.pop('pending_identity_data', None)
         return redirect(f"/employee/{target}")
     return "Chyba při potvrzování dat"
@@ -318,3 +334,124 @@ def settings():
 
 if __name__ == "__main__":
     serve(app, host='0.0.0.0', port=8080)
+
+
+@app.route('/hr/regenerate_pdfs', methods=['POST'])
+def hr_regenerate_pdfs():
+    try:
+        import os
+        import glob
+        import omega_config as cfg
+        
+        # Projdeme databázi kandidátů a vynutíme generování
+        if hasattr(cfg, 'DB_DIR') and os.path.exists(cfg.DB_DIR):
+            for filepath in glob.glob(os.path.join(cfg.DB_DIR, '*.json')):
+                token = os.path.basename(filepath).replace('.json', '')
+                gen_pdf(token, 'contract')
+                gen_pdf(token, 'nda')
+                gen_pdf(token, 'handover')
+    except Exception as e:
+        print(f"Hromadna chyba PDF: {e}")
+        
+    from flask import redirect
+    return redirect('/dashboard')
+
+
+# --- RBAC (ROLE-BASED ACCESS CONTROL) MODUL ---
+import json
+from flask import request, session, render_template
+
+
+def load_settings():
+    import json
+    import os
+    if not os.path.exists('settings.json'):
+        default = {
+            "company_name": "Omega Corp",
+            "company_address": "Neznámá 1, 110 00 Praha",
+            "company_id": "00000000",
+            "base_url": ""
+        }
+        with open('settings.json', 'w', encoding='utf-8') as f:
+            json.dump(default, f, indent=4)
+    with open('settings.json', 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+def save_settings(data):
+    import json
+    with open('settings.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4)
+
+@app.route('/admin/settings', methods=['GET', 'POST'])
+def admin_settings():
+    if not session.get('logged_in') or session.get('role') != 'admin':
+        return "Přístup odepřen.", 403
+    settings = load_settings()
+    if request.method == 'POST':
+        settings['company_name'] = request.form.get('company_name', '').strip()
+        settings['company_address'] = request.form.get('company_address', '').strip()
+        settings['company_id'] = request.form.get('company_id', '').strip()
+        settings['base_url'] = request.form.get('base_url', '').strip()
+        save_settings(settings)
+        return redirect('/admin/settings')
+    from flask import render_template
+    return render_template('settings.html', settings=settings)
+
+def load_users():
+    if not os.path.exists('users.json'):
+        with open('users.json', 'w', encoding='utf-8') as f:
+            # Výchozí uživatelé, pokud soubor neexistuje
+            json.dump({
+                "admin": {"password": "admin", "role": "admin"},
+                "hr": {"password": "hr", "role": "hr"}
+            }, f, indent=4)
+    with open('users.json', 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+def save_users(users):
+    with open('users.json', 'w', encoding='utf-8') as f:
+        json.dump(users, f, indent=4)
+
+@app.route('/login', methods=['GET', 'POST'], endpoint='rbac_login')
+def rbac_login():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        users = load_users()
+        
+        if username in users and users[username]['password'] == password:
+            session['logged_in'] = True
+            session['user'] = username
+            session['role'] = users[username]['role']
+            return redirect('/dashboard')
+        return "Nesprávné jméno nebo heslo. Zkuste to znovu.", 401
+    return render_template('login.html')
+
+@app.route('/admin/users', methods=['GET', 'POST'], endpoint='rbac_users')
+def manage_users():
+    # Tvrdá bezpečnostní kontrola - pustí jen Admina
+    if not session.get('logged_in') or session.get('role') != 'admin':
+        return "Přístup odepřen. Tuto sekci může spravovat pouze Administrátor.", 403
+        
+    users = load_users()
+    if request.method == 'POST':
+        action = request.form.get('action')
+        username = request.form.get('username', '').strip()
+        if action == 'add' and username:
+            users[username] = {
+                "password": request.form.get('password', ''),
+                "role": request.form.get('role', 'hr')
+            }
+            save_users(users)
+        elif action == 'change_password' and username:
+            if username in users:
+                users[username]['password'] = request.form.get('new_password', '')
+                save_users(users)
+        elif action == 'delete' and username and username != 'admin':
+            if username in users:
+                del users[username]
+                save_users(users)
+        return redirect('/admin/users')
+        
+    return render_template('users.html', users=users)
+# ----------------------------------------------

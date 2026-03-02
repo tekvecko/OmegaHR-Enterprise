@@ -1,0 +1,38 @@
+DOHODA O MLČENLIVOSTI A OCHRANĚ DŮVĚRNÝCH INFORMACÍ (NDA)
+uzavřená ve smyslu § 1746 odst. 2 a § 2985 zákona č. 89/2012 Sb., občanský zákoník
+
+I. Smluvní strany
+
+1. Poskytovatel: {company_name}
+   se sídlem: {company_address}
+   (dále jen "Poskytovatel") a
+
+2. Příjemce: {name}
+   Datum narození: {birthdate}
+   bytem: {address}
+   (dále jen "Příjemce")
+
+II. Předmět dohody
+
+1. Poskytovatel zpřístupní Příjemci v souvislosti s výkonem jeho pracovní činnosti ({position}) určité důvěrné informace, obchodní tajemství, strategické plány, klientská data, zdrojové kódy a interní procesy (dále společně jen "Důvěrné informace").
+2. Důvěrnými informacemi jsou veškeré informace, které nejsou běžně veřejně dostupné a mají pro Poskytovatele skutečnou nebo potenciální konkurenční či hospodářskou hodnotu.
+
+III. Závazek mlčenlivosti a ochrany
+
+1. Příjemce se výslovně zavazuje zachovávat o všech Důvěrných informacích naprostou mlčenlivost.
+2. Příjemce nesmí Důvěrné informace použít pro svůj vlastní prospěch, pro prospěch třetích stran, ani je jakýmkoli způsobem reprodukovat, šířit či sdělovat nepovolaným osobám.
+3. Tento závazek mlčenlivosti trvá po celou dobu trvání spolupráce a dále po dobu 5 let od jejího ukončení.
+
+IV. Smluvní pokuta a náhrada škody
+
+1. V případě porušení povinnosti mlčenlivosti je Příjemce povinen uhradit Poskytovateli smluvní pokutu ve výši 100 000 Kč za každé jednotlivé porušení.
+2. Zaplacením smluvní pokuty není dotčen nárok Poskytovatele na náhradu škody v plné výši.
+
+V. Závěrečná ustanovení
+
+1. Tato dohoda nabývá platnosti a účinnosti dnem jejího podpisu.
+
+V ___________________ dne {date}
+
+________________________               ________________________
+Poskytovatel                           Příjemce
