@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/python
 import os, uuid, datetime, json, sys, sqlite3, io
-from flask import Flask, render_template, request, redirect, session, send_file, send_from_directory
+from flask import Flask, request, render_template, redirect, session, send_file, send_from_directory, jsonify, url_for
 from fpdf import FPDF
 from waitress import serve
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -105,7 +105,7 @@ def gen_pdf(token, type='contract'):
             except: pass
         if not loaded: pdf.set_font("Arial", size=12)
 
-        c_type = c.get('hr_data', {}).get('contract_type', 'hpp')
+        c_type = (c.get('hr_data') or {}).get('contract_type', 'hpp')
         if type == 'contract':
             t_file = "dpp_template.txt" if c_type == 'dpp' else "contract_template.txt"
         elif type == 'nda':
@@ -122,10 +122,10 @@ def gen_pdf(token, type='contract'):
         
         vals = {
             "{token}": token, "{name}": str(c['name']),
-            "{salary}": str(c['hr_data'].get('salary', '0')),
-            "{position}": str(c['hr_data'].get('position', '-')),
+            "{salary}": str((c.get('hr_data') or {}).get('salary', '0')),
+            "{position}": str((c.get('hr_data') or {}).get('position', '-')),
             "{birthdate}": str(c.get('birthdate_mojeid', '-')),
-            "{company_name}": comp.get('name'), "{company_address}": comp.get('address'),
+            "{company_name}": (comp or {}).get('name'), "{company_address}": (comp or {}).get('address'),
             "{date}": str(datetime.date.today())
         }
         for k, v in vals.items(): content = content.replace(k, v)
@@ -332,9 +332,6 @@ def settings():
         except: pass
     return render_template('settings.html', config=get_sys_config(), success=success)
 
-if __name__ == "__main__":
-    serve(app, host='0.0.0.0', port=8080)
-
 
 @app.route('/hr/regenerate_pdfs', methods=['POST'])
 def hr_regenerate_pdfs():
@@ -354,7 +351,7 @@ def hr_regenerate_pdfs():
         print(f"Hromadna chyba PDF: {e}")
         
     from flask import redirect
-    return redirect('/dashboard')
+    return redirect('/')
 
 
 # --- RBAC (ROLE-BASED ACCESS CONTROL) MODUL ---
@@ -375,7 +372,8 @@ def load_settings():
         with open('settings.json', 'w', encoding='utf-8') as f:
             json.dump(default, f, indent=4)
     with open('settings.json', 'r', encoding='utf-8') as f:
-        return json.load(f)
+        data = json.load(f)
+        return data if data else {}
 
 def save_settings(data):
     import json
@@ -406,7 +404,8 @@ def load_users():
                 "hr": {"password": "hr", "role": "hr"}
             }, f, indent=4)
     with open('users.json', 'r', encoding='utf-8') as f:
-        return json.load(f)
+        data = json.load(f)
+        return data if data else {}
 
 def save_users(users):
     with open('users.json', 'w', encoding='utf-8') as f:
@@ -423,7 +422,7 @@ def rbac_login():
             session['logged_in'] = True
             session['user'] = username
             session['role'] = users[username]['role']
-            return redirect('/dashboard')
+            return redirect('/')
         return "Nesprávné jméno nebo heslo. Zkuste to znovu.", 401
     return render_template('login.html')
 
@@ -455,3 +454,51 @@ def manage_users():
         
     return render_template('users.html', users=users)
 # ----------------------------------------------
+
+
+
+@app.route('/hr/lifecycle/<token>', methods=['POST'])
+def hr_lifecycle(token):
+    from flask import session, request, redirect
+    if not session.get('logged_in') or session.get('role') not in ['hr', 'admin']:
+        return "Přístup odepřen.", 403
+    action = request.form.get('action')
+    try: c = db.get_candidate(token)
+    except: c = get_candidate(token)
+    if not c: return "Nenalezeno", 404
+    
+    if action == 'salary':
+        c['hr_data']['salary'] = request.form.get('new_salary', (c.get('hr_data') or {}).get('salary'))
+        try: db.save_candidate(token, c)
+        except: save_candidate(token, c)
+        gen_pdf(token, 'salary')
+    elif action == 'position':
+        c['hr_data']['position'] = request.form.get('new_position', (c.get('hr_data') or {}).get('position'))
+        try: db.save_candidate(token, c)
+        except: save_candidate(token, c)
+        gen_pdf(token, 'amendment')
+        
+    return redirect(f'/candidate/{token}')
+
+@app.route('/hr/offboard/<token>', methods=['POST'])
+def hr_offboard(token):
+    from flask import session, request, redirect
+    if not session.get('logged_in') or session.get('role') not in ['hr', 'admin']:
+        return "Přístup odepřen.", 403
+    term_type = request.form.get('term_type', 'termination_agreement')
+    try: c = db.get_candidate(token)
+    except: c = get_candidate(token)
+    if not c: return "Nenalezeno", 404
+    
+    c['offboarding_status'] = 'terminated'
+    c['term_type'] = term_type
+    try: db.save_candidate(token, c)
+    except: save_candidate(token, c)
+    
+    gen_pdf(token, term_type)
+    return redirect(f'/candidate/{token}')
+
+if __name__ == "__main__":
+    serve(app, host='0.0.0.0', port=8080)
+
+
