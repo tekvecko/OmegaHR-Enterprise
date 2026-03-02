@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="w-full aspect-[1.6] bg-brand-dark rounded-3xl p-6 relative overflow-hidden shadow-2xl mb-8 text-white">
+    <div class="absolute top-0 right-0 w-40 h-40 bg-brand-gold rounded-full blur-[80px] opacity-30 -mr-10 -mt-10"></div>
+    <div class="relative z-10 flex flex-col justify-between h-full">
+        <div class="flex justify-between items-start">
+            <div>
+                <div class="text-[10px] uppercase tracking-widest opacity-60 text-brand-gold">Employee</div>
+                <div class="text-xl font-serif mt-1">{{ c.name }}</div>
+                <div class="text-sm text-gray-400">{{ c.hr_data.position }}</div>
+            </div>
+            <i class="ri-fingerprint-line text-3xl opacity-30"></i>
+        </div>
+        <div class="flex justify-between items-end">
+            <div class="text-[10px] font-mono opacity-50">{{ c.token }}</div>
+            {% if c.status == 'signed' %}
+                <div class="bg-green-500/20 text-green-400 border border-green-500/30 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1"><i class="ri-shield-check-fill"></i> Verified</div>
+            {% else %}
+                <div class="text-brand-gold text-xs font-bold">Pending Signature</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if c.status != 'signed' %}
+<div class="bg-white p-6 rounded-3xl shadow-sm mb-6 text-center">
+    <h3 class="font-bold text-gray-800 mb-2">Complete Onboarding</h3>
+    <p class="text-xs text-gray-500 mb-4">Sign your contract using your verified digital identity.</p>
+    <a href="/auth/mojeid/verify/{{ c.token }}" class="block w-full bg-blue-600 text-white py-3 rounded-xl font-bold shadow-md">Verify via MojeID</a>
+</div>
+{% endif %}
+
+<div class="grid grid-cols-2 gap-4">
+    <a href="/download/{{ c.filename }}" class="bg-white p-5 rounded-3xl shadow-sm flex flex-col items-center justify-center gap-3 aspect-square active:scale-95 transition">
+        <div class="w-14 h-14 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center text-2xl"><i class="ri-file-pdf-2-fill"></i></div>
+        <span class="text-xs font-bold text-gray-700">Contract</span>
+    </a>
+</div>
+{% endblock %}

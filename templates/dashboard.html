@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-4 flex gap-2">
+    <a href="/?filter=all" class="bg-brand-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg">All</a>
+    <a href="/?filter=signed" class="bg-white border px-4 py-2 rounded-xl text-sm text-gray-500">Active</a>
+</div>
+<div class="space-y-3">
+    {% for c in cands %}
+    <a href="/candidate/{{ c.token }}" class="block bg-white p-4 rounded-2xl shadow-sm border-l-4 {% if c.status=='signed' %}border-green-500{% else %}border-brand-gold{% endif %}">
+        <div class="font-bold text-gray-800">{{ c.name }}</div>
+        <div class="text-xs text-gray-500">{{ c.hr_data.position }}</div>
+        {% if c.offboarding_status == 'terminated' %}
+            <span class="text-xs text-red-500 font-bold bg-red-50 px-2 py-1 rounded mt-2 inline-block">TERMINATED</span>
+        {% endif %}
+    </a>
+    {% endfor %}
+</div>
+
+<div class="mt-8 bg-white p-6 rounded-3xl shadow-lg border border-gray-100">
+    <h3 class="font-bold mb-4 text-brand-dark"><i class="ri-upload-cloud-2-line text-brand-gold mr-2"></i>Smart CV Parser</h3>
+    <form action="/recruit/upload" method="POST" enctype="multipart/form-data" class="space-y-3">
+        <input type="file" name="cv" accept=".pdf" class="w-full bg-gray-50 p-2 rounded-xl text-sm">
+        <button class="w-full bg-brand-gold text-brand-dark py-3 rounded-xl font-bold shadow-md">Upload & Parse</button>
+    </form>
+</div>
+
+<div class="mt-4 bg-white p-6 rounded-3xl shadow-lg border border-gray-100">
+    <h3 class="font-bold mb-4 text-brand-dark"><i class="ri-user-add-line text-brand-gold mr-2"></i>Manual Entry</h3>
+    <form action="/new" method="POST" class="space-y-3">
+        <input name="name" placeholder="Full Name" class="w-full bg-gray-50 border-none p-3 rounded-xl outline-none">
+        <input name="position" placeholder="Position" class="w-full bg-gray-50 border-none p-3 rounded-xl outline-none">
+        <input name="salary" placeholder="Salary" type="number" class="w-full bg-gray-50 border-none p-3 rounded-xl outline-none">
+        <button class="w-full bg-brand-dark text-white py-3 rounded-xl font-bold shadow-md">Create Profile</button>
+    </form>
+</div>
+{% endblock %}

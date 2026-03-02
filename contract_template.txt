@@ -1,0 +1,78 @@
+PRACOVNÍ SMLOUVA
+uzavřená dle § 33 a násl. zákona č. 262/2006 Sb.. zákoník práce, ve znění pozdějších předpisů
+
+I. Smluvní strany
+
+1. Zaměstnavatel: {company_name}
+   se sídlem: {company_address}
+   (dále jen "Zaměstnavatel") a
+
+2. Zaměstnanec: {name}
+   Datum narození: {birthdate}
+   bytem: {address}
+   (dále jen "Zaměstnanec")
+
+Zaměstnavatel a Zaměstnanec (společně dále jen "Smluvní strany") uzavírají tuto Pracovní smlouvu (dále jen "Smlouva") dobrovolně a za následujících podmínek:
+
+II. Druh práce a místo výkonu práce
+
+1. Zaměstnanec se zavazuje vykonávat pro Zaměstnavatele práci na pracovní pozici: {position}.
+2. Náplní práce Zaměstnance jsou činnosti obvykle spojené s touto pozicí. Zaměstnavatel je oprávněn upřesňovat pracovní úkoly v rámci sjednaného druhu práce.
+3. Místem výkonu práce je sídlo Zaměstnavatele.
+4. Pravidelným pracovištěm pro účely cestovních náhrad je sídlo Zaměstnavatele. Zaměstnanec souhlasí s vysíláním na pracovní cesty na dobu nezbytné potřeby.
+
+III. Den nástupu a trvání pracovního poměru
+
+1. Den nástupu do práce je sjednán na: {date}. Tímto dnem vzniká pracovní poměr.
+2. Pracovní poměr se sjednává na dobu neurčitou.
+
+IV. Zkušební doba
+
+1. Smluvní strany sjednávají zkušební dobu v délce 3 měsíce ode dne vzniku pracovního poměru.
+2. Zkušební doba se automaticky prodlužuje o dobu celodenních překážek v práci, pro které Zaměstnanec nekoná práci, a o dobu celodenní dovolené. Zkušební doba se dále prodlužuje o dny neomluvené absence Zaměstnance.
+3. Smluvní strany se ve smyslu § 35 odst. 3 Zákoníku práce výslovně dohodly, že zkušební dobu lze v jejím průběhu písemnou dohodou dodatečně prodloužit, a to až do zákonného maxima stanoveného v § 35 odst. 1 Zákoníku práce.
+
+V. Mzda, dovolená a benefity
+
+1. Za vykonanou práci náleží Zaměstnanci mzda, jejíž výše a struktura je stanovena takto:
+   Základní mzda (Nároková složka) - Za vykonanou práci Zaměstnanci přísluší základní měsíční mzda ve výši: {salary} Kč měsíčně. Tato částka je pevná a náleží Zaměstnanci za odpracovanou dobu.
+2. Mzda je splatná po vykonání práce, a to v kalendářním měsíci následujícím po měsíci, ve kterém vzniklo právo na mzdu. Výplatním termínem je 15. den v měsíci. Mzda bude vyplácena bezhotovostně na bankovní účet určený Zaměstnancem.
+3. Zaměstnanci náleží dovolená v rozsahu 4 týdny za kalendářní rok. Čerpání dovolené se řídí zákoníkem práce a pokyny Zaměstnavatele.
+4. Benefity: Zaměstnavatel může poskytovat Zaměstnanci nad rámec mzdy a zákonných nároků další plnění a zaměstnanecké výhody. Smluvní strany sjednávají, že tato plnění jsou nenárokovou složkou odměňování.
+
+VI. Pracovní doba a právo na odpojení
+
+1. Stanovená týdenní pracovní doba činí 40 hodin. Rozvržení pracovní doby určuje Zaměstnavatel v souladu se Zákoníkem práce a vnitřními předpisy.
+2. Právo na odpojení: Zaměstnanec není povinen sledovat pracovní komunikaci a reagovat na ni mimo svou rozvrženou pracovní dobu, s výjimkou případů pracovní pohotovosti sjednané podle § 95 Zákoníku práce nebo mimořádných situací, kdy hrozí vznik škody na majetku či zdraví.
+
+VII. Práce na dálku (Home Office)
+
+1. Výkon práce na dálku je možný pouze na základě písemné dohody mezi Zaměstnavatelem a Zaměstnancem.
+2. Náhrada nákladů: Smluvní strany se ve smyslu § 190a odst. 1 písm. c) Zákoníku práce dohodly, že v případě výkonu práce na dálku Zaměstnanci nepřísluší náhrada nákladů spojených s výkonem práce na dálku. Smluvní strany shodně prohlašují, že sjednaná mzda již zohledňuje i případné náklady spojené s prací na dálku.
+
+VIII. Ochrana duševního vlastnictví, autorská práva a AI
+
+1. Zaměstnanecká díla: Smluvní strany berou na vědomí, že veškeré výsledky tvůrčí činnosti Zaměstnance, které vytvoří v souvislosti s plněním pracovních úkolů, jsou zaměstnaneckými díly ve smyslu § 58 autorského zákona. Majetková práva k těmto Dílům vykonává svým jménem a na svůj účet Zaměstnavatel.
+2. Využívání umělé inteligence (AI): Zaměstnanec je oprávněn využívat nástroje generativní umělé inteligence při plnění pracovních úkolů pouze v rozsahu a za podmínek stanovených vnitřními předpisy Zaměstnavatele.
+3. Ochrana dat: Zaměstnanec se zavazuje, že do veřejně dostupných nástrojů AI nebude vkládat žádné důvěrné informace, osobní údaje, obchodní tajemství, zdrojové kódy ani jiné chráněné know-how Zaměstnavatele.
+4. Práva k výstupům: V případě, že výstup generovaný AI nesplňuje znaky autorského díla, postoupí Zaměstnanec tento výstup Zaměstnavateli jako obchodní tajemství či know-how.
+
+IX. Ochrana informací, osobních údajů a digitální komunikace
+
+1. Mlčenlivost: Zaměstnanec se zavazuje zachovávat mlčenlivost o všech skutečnostech, které se dozvěděl při výkonu práce a které tvoří obchodní tajemství Zaměstnavatele nebo jsou důvěrné povahy. Tato povinnost trvá i po skončení pracovního poměru.
+2. Ochrana osobních údajů: Zaměstnanec bere na vědomí, že Zaměstnavatel zpracovává jeho osobní údaje v souladu s GDPR.
+3. Monitoring: Zaměstnanec bere na vědomí, že Zaměstnavatel je oprávněn v nezbytném rozsahu kontrolovat užívání svěřených pracovních prostředků v souladu s § 316 Zákoníku práce.
+
+X. Skončení pracovního poměru
+
+1. Pracovní poměr může být rozvázán způsoby uvedenými v Zákoníku práce. Výpovědní doba činí 2 měsíce, není-li dále stanoveno jinak.
+
+XI. Závěrečná ustanovení
+
+1. Zaměstnanec potvrzuje, že byl před podpisem této Smlouvy seznámen s právy a povinnostmi vyplývajícími z této Smlouvy, s pracovními podmínkami a předpisy k zajištění bezpečnosti a ochrany zdraví při práci.
+2. Tato Smlouva je vyhotovena ve dvou stejnopisech, z nichž každá strana obdrží po jednom. Práva a povinnosti touto Smlouvou neupravené se řídí příslušnými ustanoveními Zákoníku práce a občanského zákoníku.
+
+V ___________________ dne {date}
+
+________________________               ________________________
+Podpis Zaměstnavatele                  Podpis Zaměstnance

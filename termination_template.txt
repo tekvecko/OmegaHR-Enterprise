@@ -1,0 +1,7 @@
+TERMINATION OF EMPLOYMENT
+ID: {token}
+
+This document confirms the termination of employment for {name}
+effective date: {date}.
+
+All obligations have been settled. Access to corporate systems has been revoked.

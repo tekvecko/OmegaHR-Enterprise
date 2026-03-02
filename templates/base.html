@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config={theme:{extend:{fontFamily:{sans:['"Plus Jakarta Sans"','sans-serif'],serif:['"Playfair Display"','serif']},colors:{brand:{gold:'#C5A572',dark:'#121212',surface:'#1E1E1E'}}}}}
+    </script>
+    <title>OmegaHR Enterprise</title>
+</head>
+<body class="bg-gray-50 pb-20 font-sans">
+    <header class="p-6 bg-brand-dark text-white shadow-sm flex justify-between items-center rounded-b-3xl">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-brand-gold text-brand-dark flex items-center justify-center font-bold rounded-xl">Ω</div>
+            <h1 class="font-serif text-xl">OmegaHR</h1>
+        </div>
+        <div class="text-xs text-brand-gold font-bold">
+            {% if session.get('role') %}
+                {{ session.get('role').upper() }} | <a href="/logout" class="text-white ml-2"><i class="ri-logout-box-r-line"></i></a>
+            {% endif %}
+        </div>
+    </header>
+    <main class="p-4 max-w-lg mx-auto">
+        {% block content %}{% endblock %}
+    </main>
+    {% if session.get('user_token') %}
+    <nav class="fixed bottom-0 w-full bg-white border-t p-4 flex justify-around shadow-[0_-10px_40px_rgba(0,0,0,0.05)] rounded-t-3xl z-50">
+        {% if session.get('role') in ['admin','hr'] %}
+            <a href="/" class="text-2xl text-gray-400 hover:text-brand-gold"><i class="ri-home-fill"></i></a>
+            <a href="/reports" class="text-2xl text-gray-400 hover:text-brand-gold"><i class="ri-pie-chart-fill"></i></a>
+            <a href="/docs" class="text-2xl text-gray-400 hover:text-brand-gold"><i class="ri-book-read-fill"></i></a>
+            {% if session.get('role') == 'admin' %}
+                <a href="/admin/settings" class="text-2xl text-gray-400 hover:text-brand-gold"><i class="ri-settings-4-fill"></i></a>
+            {% endif %}
+        {% else %}
+            <a href="/employee/{{ session.get('user_token') }}" class="text-2xl text-brand-gold"><i class="ri-user-smile-fill"></i></a>
+        {% endif %}
+    </nav>
+    {% endif %}
+</body>
+</html>
