@@ -1,95 +1,41 @@
-{% extends "base.html" %}
-
-{% block title %}Nový nástup - OmegaHR{% endblock %}
-{% block header %}Založení nového profilu{% endblock %}
-
-{% block content %}
-<form action="/new" method="POST" class="max-w-5xl mx-auto space-y-6">
-    <div class="flex items-center justify-between mb-2">
-        <div>
-            <h2 class="text-xl font-black text-gray-900">Vyplňte údaje nového kolegy</h2>
-            <p class="text-sm text-gray-500">Po uložení se automaticky vygeneruje Pracovní smlouva a NDA.</p>
-        </div>
-        <a href="/" class="text-gray-500 hover:text-gray-900 text-sm font-bold flex items-center gap-2 transition">
-            <i class="ri-close-line text-lg"></i> Zrušit
-        </a>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-gray-100 pb-4">
-                <i class="ri-user-smile-line text-lg text-brand-gold"></i> 1. Osobní údaje
-            </h3>
-            <div class="space-y-5">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Jméno</label>
-                        <input type="text" name="name" required class="w-full bg-gray-50 p-3.5 rounded-xl outline-none border border-gray-200 focus:border-brand-gold focus:bg-white transition text-sm font-bold text-gray-700">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Příjmení</label>
-                        <input type="text" name="surname" required class="w-full bg-gray-50 p-3.5 rounded-xl outline-none border border-gray-200 focus:border-brand-gold focus:bg-white transition text-sm font-bold text-gray-700">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Osobní E-mail</label>
-                    <input type="email" name="email" required class="w-full bg-gray-50 p-3.5 rounded-xl outline-none border border-gray-200 focus:border-brand-gold focus:bg-white transition text-sm text-gray-700 font-mono">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Telefon</label>
-                    <input type="text" name="phone" class="w-full bg-gray-50 p-3.5 rounded-xl outline-none border border-gray-200 focus:border-brand-gold focus:bg-white transition text-sm text-gray-700">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Datum narození</label>
-                    <input type="text" name="birthdate" placeholder="DD.MM.YYYY" required class="w-full bg-gray-50 p-3.5 rounded-xl outline-none border border-gray-200 focus:border-brand-gold focus:bg-white transition text-sm text-gray-700">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Trvalé bydliště (Plná adresa)</label>
-                    <input type="text" name="address" required class="w-full bg-gray-50 p-3.5 rounded-xl outline-none border border-gray-200 focus:border-brand-gold focus:bg-white transition text-sm text-gray-700">
-                </div>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>OmegaHR | Nový Nábor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-10">
+    <div class="max-w-md mx-auto bg-gray-800 p-8 rounded-lg shadow-2xl">
+        <h2 class="text-2xl font-bold mb-6 text-blue-400 text-center">Nový Zaměstnanec</h2>
+        <form action="/new" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-sm">Jméno</label>
+                <input type="text" name="name" class="w-full bg-gray-700 p-2 rounded" required>
             </div>
-        </div>
-
-        <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2 border-b border-gray-100 pb-4">
-                <i class="ri-briefcase-line text-lg text-brand-gold"></i> 2. Pracovní zařazení
-            </h3>
-            <div class="space-y-5">
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Typ úvazku</label>
-                    <select name="contract_type" class="w-full bg-gray-50 p-3.5 rounded-xl outline-none border border-gray-200 focus:border-brand-gold focus:bg-white transition text-sm font-bold text-gray-700 appearance-none">
-                        <option value="HPP">HPP - Hlavní pracovní poměr</option>
-                        <option value="DPP">DPP - Dohoda o provedení práce</option>
-                        <option value="ICO">IČO - Kontraktor (B2B)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Název pozice</label>
-                    <input type="text" name="position" required class="w-full bg-gray-50 p-3.5 rounded-xl outline-none border border-gray-200 focus:border-brand-gold focus:bg-white transition text-sm font-bold text-gray-700">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Oddělení (Department)</label>
-                    <input type="text" name="department" class="w-full bg-gray-50 p-3.5 rounded-xl outline-none border border-gray-200 focus:border-brand-gold focus:bg-white transition text-sm text-gray-700">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Datum nástupu</label>
-                        <input type="text" name="start_date" placeholder="DD.MM.YYYY" required class="w-full bg-gray-50 p-3.5 rounded-xl outline-none border border-gray-200 focus:border-brand-gold focus:bg-white transition text-sm text-gray-700">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Hrubá mzda (Kč)</label>
-                        <input type="number" name="salary" required class="w-full bg-gray-50 p-3.5 rounded-xl outline-none border border-gray-200 focus:border-brand-gold focus:bg-white transition text-sm font-black text-gray-900">
-                    </div>
-                </div>
+            <div>
+                <label class="block text-sm">Příjmení</label>
+                <input type="text" name="surname" class="w-full bg-gray-700 p-2 rounded" required>
             </div>
+            <div>
+                <label class="block text-sm">Email</label>
+                <input type="email" name="email" class="w-full bg-gray-700 p-2 rounded" required>
+            </div>
+            <div>
+                <label class="block text-sm">Pozice</label>
+                <input type="text" name="position" class="w-full bg-gray-700 p-2 rounded" value="Developer">
+            </div>
+            <div>
+                <label class="block text-sm">Plat (CZK)</label>
+                <input type="number" name="salary" class="w-full bg-gray-700 p-2 rounded" value="50000">
+            </div>
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded font-bold transition">
+                ZAPSAT DO SYSTÉMU
+            </button>
+        </form>
+        <div class="mt-4 text-center">
+            <a href="/" class="text-gray-400 hover:text-white text-sm">← Zpět na Dashboard</a>
         </div>
     </div>
-
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between sticky bottom-6 z-10">
-        <p class="text-sm text-gray-500"><i class="ri-shield-check-line text-green-500"></i> Data jsou bezpečně uložena s 256-bit šifrováním.</p>
-        <button type="submit" class="bg-gray-900 text-brand-gold px-8 py-4 rounded-xl font-black hover:bg-black transition shadow-xl shadow-gray-900/30 flex items-center gap-2">
-            Založit profil a vygenerovat dokumenty <i class="ri-arrow-right-line"></i>
-        </button>
-    </div>
-</form>
-{% endblock %}
+</body>
+</html>

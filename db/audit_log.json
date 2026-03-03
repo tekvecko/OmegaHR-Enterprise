@@ -1,5 +1,101 @@
 [
     {
+        "timestamp": "2026-03-03 10:35:50",
+        "user": "admin",
+        "action": "Přihlášení",
+        "target": "Systém",
+        "details": "Úspěšný vstup",
+        "category": "Systém"
+    },
+    {
+        "timestamp": "2026-03-03 10:35:47",
+        "user": "hr",
+        "action": "Pokus o průnik",
+        "target": "Zabezpečení",
+        "details": "Heslo: hr",
+        "category": "Bezpečnost"
+    },
+    {
+        "timestamp": "2026-03-03 10:35:45",
+        "user": "hr",
+        "action": "Pokus o průnik",
+        "target": "Zabezpečení",
+        "details": "Heslo: hr",
+        "category": "Bezpečnost"
+    },
+    {
+        "timestamp": "2026-03-03 10:33:45",
+        "user": "hr",
+        "action": "Pokus o průnik",
+        "target": "Zabezpečení",
+        "details": "Heslo: hr",
+        "category": "Bezpečnost"
+    },
+    {
+        "timestamp": "2026-03-03 10:33:37",
+        "user": "hr",
+        "action": "Pokus o průnik",
+        "target": "Zabezpečení",
+        "details": "Heslo: hr",
+        "category": "Bezpečnost"
+    },
+    {
+        "timestamp": "2026-03-03 10:33:34",
+        "user": "hr",
+        "action": "Pokus o průnik",
+        "target": "Zabezpečení",
+        "details": "Heslo: hr",
+        "category": "Bezpečnost"
+    },
+    {
+        "timestamp": "2026-03-03 10:30:28",
+        "user": "admin",
+        "action": "Přihlášení",
+        "target": "Systém",
+        "details": "Úspěšný vstup",
+        "category": "Systém"
+    },
+    {
+        "timestamp": "2026-03-03 10:04:35",
+        "user": "admin",
+        "action": "Přihlášení",
+        "target": "Systém",
+        "details": "Úspěšný vstup",
+        "category": "Systém"
+    },
+    {
+        "timestamp": "2026-03-03 09:33:38",
+        "user": "hacker",
+        "action": "Pokus o průnik",
+        "target": "Zabezpečení",
+        "details": "Heslo: abc",
+        "category": "Bezpečnost"
+    },
+    {
+        "timestamp": "2026-03-03 09:33:38",
+        "user": "System",
+        "action": "Kritická chyba serveru",
+        "target": "Kernel",
+        "details": "500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.",
+        "category": "Systém"
+    },
+    {
+        "timestamp": "2026-03-03 09:31:26",
+        "user": "System",
+        "action": "Kritická chyba serveru",
+        "target": "Kernel",
+        "details": "500 Internal Server Error: The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.",
+        "category": "Systém"
+    },
+    {
+        "timestamp": "2026-03-03 09:31:26",
+        "user": "admin",
+        "action": "Přihlášení",
+        "target": "Systém",
+        "details": "Úspěšný vstup",
+        "category": "Systém"
+    },
+    {
         "timestamp": "2026-03-03 09:29:34",
         "user": "hacker",
         "action": "Pokus o průnik",

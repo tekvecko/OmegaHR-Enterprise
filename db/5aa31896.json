@@ -1,0 +1,12 @@
+{
+    "personal_data": {
+        "name": "Injekce",
+        "surname": "Uspesna",
+        "email": "test@omega.cz"
+    },
+    "hr_data": {
+        "position": "System",
+        "salary": "100000"
+    },
+    "token": "5aa31896"
+}

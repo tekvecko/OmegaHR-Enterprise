@@ -14,6 +14,24 @@ import omega_services
 
 app = Flask(__name__)
 
+@app.route('/new', methods=['GET', 'POST'])
+def new_candidate():
+    import uuid, json, os
+    if request.method == 'POST':
+        token = str(uuid.uuid4())[:8]
+        data = {
+            "personal_data": {"name": request.form.get('name'), "surname": request.form.get('surname'), "email": request.form.get('email')},
+            "hr_data": {"position": request.form.get('position'), "salary": request.form.get('salary')},
+            "token": token
+        }
+        path = f"/data/data/com.termux/files/home/OmegaPlatinum_PROD/db/{token}.json"
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+        return redirect(url_for('index'))
+    return render_template('new.html')
+
+app.config['WTF_CSRF_ENABLED'] = False
+
 @app.context_processor
 def inject_settings():
     import json, os
@@ -132,6 +150,9 @@ def gen_pdf(token, type='contract'):
 
 
 
+
+
+
 @app.route('/admin/backup')
 def run_backup_web():
     import subprocess
@@ -146,7 +167,7 @@ def run_backup_web():
 def recent_logs():
     import json
     try:
-        with open('db/audit_log.json', 'r', encoding='utf-8') as f:
+        with open('/data/data/com.termux/files/home/OmegaPlatinum_PROD/db/audit_log.json', 'r', encoding='utf-8') as f:
             logs = json.load(f)
         return json.dumps(logs[:5])
     except: return "[]"
@@ -155,7 +176,7 @@ def recent_logs():
 def get_stats():
     import json
     try:
-        with open('db/audit_log.json', 'r', encoding='utf-8') as f:
+        with open('/data/data/com.termux/files/home/OmegaPlatinum_PROD/db/audit_log.json', 'r', encoding='utf-8') as f:
             logs = json.load(f)
         stats = {"HR": 0, "Security": 0, "System": 0, "Other": 0}
         for entry in logs:
@@ -168,7 +189,7 @@ def get_stats():
     except: return "{}"
 
 @app.route('/')
-def dash():
+def index():
     if not is_staff(): return redirect('/login')
     cands = [fix_data(c) for c in db.get_all()]
     f = request.args.get('filter')
@@ -603,7 +624,7 @@ def handle_leave(token):
 
 def log_action(user, action, target="", details="", category="Ostatní"):
     import datetime, json, os
-    log_file = 'db/audit_log.json'
+    log_file = '/data/data/com.termux/files/home/OmegaPlatinum_PROD/db/audit_log.json'
     entry = {
         "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "user": user, "action": action, "target": target, "details": details, "category": category
