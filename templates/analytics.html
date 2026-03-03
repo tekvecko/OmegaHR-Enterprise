@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="cs" data-theme="dark">
+<head>
+    <meta charset="UTF-8"><title>OMEGA | Intelligence & Compliance</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --bg: #030708; --main: #00a2ff; --accent: #00ff9d; --danger: #ff3e3e; --card: rgba(16,22,26,0.7); --text: #eee; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin:0; padding: 20px; }
+        .grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .card { background: var(--card); border: 1px solid rgba(0,162,255,0.1); border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+        .audit-entry { font-family: monospace; font-size: 0.85rem; padding: 8px 0; border-bottom: 1px solid #222; display: flex; gap: 15px; }
+        .audit-time { color: var(--main); }
+        .pulse { display: inline-block; width: 10px; height: 10px; background: var(--accent); border-radius: 50%; margin-right: 10px; box-shadow: 0 0 10px var(--accent); animation: blink 2s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .compliance-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .status-ok { background: rgba(0,255,157,0.1); color: var(--accent); }
+        .status-warn { background: rgba(255,62,62,0.1); color: var(--danger); }
+    </style>
+</head>
+<body>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h1>CORE <span style="color:var(--main)">INTELLIGENCE</span></h1>
+        <a href="/" style="color:var(--text); text-decoration:none;"><i class="fa-solid fa-xmark"></i></a>
+    </div>
+
+    <div class="grid">
+        <div class="left-col">
+            <div class="card">
+                <h3><i class="fa-solid fa-shield-halved"></i> Compliance Status</h3>
+                <table style="width:100%; border-collapse:collapse;">
+                    <tr style="text-align:left; color:#555; font-size:0.75rem;">
+                        <th>ZAMĚSTNANEC</th><th>SMLOUVA</th><th>ŠKOLENÍ BOZP</th>
+                    </tr>
+                    {% for e in employees %}
+                    <tr style="border-bottom: 1px solid #222;">
+                        <td style="padding:10px 0;">{{ e.name }}</td>
+                        <td><span class="compliance-tag status-ok">AKTIVNÍ</span></td>
+                        <td><span class="compliance-tag {% if not e.safety_training_date %}status-warn{% else %}status-ok{% endif %}">
+                            {{ e.safety_training_date or 'CHYBÍ' }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        <div class="right-col">
+            <div class="card">
+                <h3><span class="pulse"></span> LIVE AUDIT STREAM</h3>
+                <div id="audit-content">
+                    <div class="audit-entry"><span class="audit-time">Nyní</span> <span style="color:#888;">Monitorování aktivní...</span></div>
+                </div>
+            </div>
+            
+            <div class="card" style="border-left: 4px solid var(--main);">
+                <h4 style="margin:0;">Vytížení Skladu</h4>
+                <p style="font-size:1.5rem; font-weight:bold; margin:10px 0;">{{ health }}%</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

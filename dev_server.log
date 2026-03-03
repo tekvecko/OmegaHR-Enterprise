@@ -1,0 +1,4 @@
+  File "/data/data/com.termux/files/home/OmegaPlatinum_PROD/omega_core.py", line 59
+    return render_template('index.html', employees=employees, stock=stock, asset_map=asset_map, count=len(employees), asset_map=asset_map, stock=stock)
+                                                                                                                                           ^^^^^^^^^^^
+SyntaxError: keyword argument repeated: stock

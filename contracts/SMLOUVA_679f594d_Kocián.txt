@@ -1,0 +1,6 @@
+SMLOUVA OMEGA PLATINUM
+ID: ID-68B7
+Zaměstnanec: Zbyněk Kocián
+Pozice: Analytik
+Plat: 70000 CZK
+ARD Validace: 679f594d

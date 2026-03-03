@@ -2,40 +2,50 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <title>OmegaHR | Nový Nábor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>OMEGA | Nový nábor</title>
+    <style>
+        body { background: #0a0a0a; color: #eee; font-family: sans-serif; margin: 0; padding: 50px; }
+        .form-container { max-width: 600px; margin: 0 auto; background: #111; padding: 40px; border-radius: 10px; border: 1px solid #333; }
+        h2 { color: #3498db; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        label { display: block; margin-bottom: 5px; color: #888; font-size: 0.8rem; }
+        input { width: 100%; padding: 10px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 4px; box-sizing: border-box; margin-bottom: 15px; }
+        .actions { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .btn { background: #3498db; color: white; padding: 12px 25px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .back { color: #666; text-decoration: none; }
+    </style>
 </head>
-<body class="bg-gray-900 text-white p-10">
-    <div class="max-w-md mx-auto bg-gray-800 p-8 rounded-lg shadow-2xl">
-        <h2 class="text-2xl font-bold mb-6 text-blue-400 text-center">Nový Zaměstnanec</h2>
-        <form action="/new" method="POST" class="space-y-4">
-            <div>
-                <label class="block text-sm">Jméno</label>
-                <input type="text" name="name" class="w-full bg-gray-700 p-2 rounded" required>
+<body>
+    <div class="form-container">
+        <h2>REGISTRACE NOVÉHO ZAMĚSTNANCE</h2>
+        <form method="post">
+            <div class="grid">
+                <div>
+                    <label>JMÉNO</label>
+                    <input name="name" placeholder="Emanuel" required>
+                </div>
+                <div>
+                    <label>PŘÍJMENÍ</label>
+                    <input name="surname" placeholder="Konečný" required>
+                </div>
             </div>
-            <div>
-                <label class="block text-sm">Příjmení</label>
-                <input type="text" name="surname" class="w-full bg-gray-700 p-2 rounded" required>
+            <label>EMAIL</label>
+            <input name="email" type="email" placeholder="e.konecny@omega.cz" required>
+            <div class="grid">
+                <div>
+                    <label>POZICE</label>
+                    <input name="position" placeholder="Senior Developer" required>
+                </div>
+                <div>
+                    <label>NÁSTUPNÍ PLAT (CZK)</label>
+                    <input name="salary" type="number" placeholder="85000" required>
+                </div>
             </div>
-            <div>
-                <label class="block text-sm">Email</label>
-                <input type="email" name="email" class="w-full bg-gray-700 p-2 rounded" required>
+            <div class="actions">
+                <a href="/" class="back">← ZPĚT NA DASHBOARD</a>
+                <button type="submit" class="btn">POTVRDIT NÁBOR</button>
             </div>
-            <div>
-                <label class="block text-sm">Pozice</label>
-                <input type="text" name="position" class="w-full bg-gray-700 p-2 rounded" value="Developer">
-            </div>
-            <div>
-                <label class="block text-sm">Plat (CZK)</label>
-                <input type="number" name="salary" class="w-full bg-gray-700 p-2 rounded" value="50000">
-            </div>
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded font-bold transition">
-                ZAPSAT DO SYSTÉMU
-            </button>
         </form>
-        <div class="mt-4 text-center">
-            <a href="/" class="text-gray-400 hover:text-white text-sm">← Zpět na Dashboard</a>
-        </div>
     </div>
 </body>
 </html>

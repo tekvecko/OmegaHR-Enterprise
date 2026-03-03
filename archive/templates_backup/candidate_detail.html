@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="text-center mb-8 bg-white p-6 rounded-3xl shadow-sm">
+    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4 text-gray-400">{{ c.name[0] }}</div>
+    <div class="text-2xl font-bold text-brand-dark">{{ c.name }}</div>
+    <div class="text-brand-gold font-bold text-sm">{{ c.hr_data.position }} <span class="text-gray-400">|</span> {{ c.hr_data.get("contract_type", "hpp") | upper }}</div>
+    
+    {% if c.offboarding_status != 'terminated' %}
+        <form action="/manage/otp/generate/{{ c.token }}" method="POST" class="mt-4">
+            <button class="bg-brand-dark text-white px-6 py-2 rounded-xl text-sm font-bold shadow-md">Generate Login QR</button>
+        </form>
+        {% if request.args.get('show_otp') %}
+            <div class="mt-4 p-4 bg-white border rounded-xl">
+                <img src="/tools/qr_otp/{{ request.args.get('show_otp') }}" class="mx-auto w-32 h-32">
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="mt-4 text-red-500 font-bold bg-red-50 py-2 rounded-xl text-sm">TERMINATED</div>
+    {% endif %}
+</div>
+
+<div class="bg-white p-5 rounded-3xl shadow-sm mb-6">
+    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Documentation</h3>
+    <div class="flex justify-between items-center mb-3 p-3 bg-gray-50 rounded-xl">
+        <div class="flex items-center gap-3">
+            <i class="ri-file-pdf-fill text-red-500 text-xl"></i>
+            <span class="text-sm font-bold text-gray-700">Contract</span>
+        </div>
+        <a href="/download/{{ c.filename }}" class="text-brand-gold hover:text-brand-dark transition"><i class="ri-download-cloud-2-line text-xl"></i></a>
+    </div>
+    
+    <div class="flex justify-between items-center mb-3 p-3 bg-gray-50 rounded-xl">
+        <div class="flex items-center gap-3">
+            <i class="ri-lock-fill text-brand-gold text-xl"></i>
+            <span class="text-sm font-bold text-gray-700">NDA (Mlčenlivost)</span>
+        </div>
+        <a href="/download/{{ c.nda_filename }}" class="text-brand-gold hover:text-brand-dark transition"><i class="ri-download-cloud-2-line text-xl"></i></a>
+    </div>
+    
+    <div class="flex justify-between items-center mb-3 p-3 bg-gray-50 rounded-xl">
+        <div class="flex items-center gap-3">
+            <i class="ri-macbook-line text-blue-500 text-xl"></i>
+            <span class="text-sm font-bold text-gray-700">Předávací protokol (HW)</span>
+        </div>
+        <a href="/download/{{ c.handover_filename }}" class="text-blue-500 hover:text-brand-dark transition"><i class="ri-download-cloud-2-line text-xl"></i></a>
+    </div>
+
+    
+    {% if c.has_salary %}
+    <div class="flex justify-between items-center mb-3 p-3 bg-green-50 rounded-xl border border-green-100">
+        <div class="flex items-center gap-3">
+            <i class="ri-money-dollar-circle-fill text-green-600 text-xl"></i>
+            <span class="text-sm font-bold text-gray-700">Mzdový výměr</span>
+        </div>
+        <a href="/download/{{ c.salary_filename }}" class="text-green-600 hover:text-green-800 transition"><i class="ri-download-cloud-2-line text-xl"></i></a>
+    </div>
+    {% endif %}
+    
+    {% if c.has_amendment %}
+    <div class="flex justify-between items-center mb-3 p-3 bg-purple-50 rounded-xl border border-purple-100">
+        <div class="flex items-center gap-3">
+            <i class="ri-file-add-fill text-purple-600 text-xl"></i>
+            <span class="text-sm font-bold text-gray-700">Dodatek č.1 (Pozice)</span>
+        </div>
+        <a href="/download/{{ c.amendment_filename }}" class="text-purple-600 hover:text-purple-800 transition"><i class="ri-download-cloud-2-line text-xl"></i></a>
+    </div>
+    {% endif %}
+
+    {% if c.offboarding_status == 'terminated' %}
+
+    <div class="flex justify-between items-center p-3 bg-red-50 rounded-xl border border-red-100">
+        <div class="flex items-center gap-3">
+            <i class="ri-file-warning-fill text-red-500 text-xl"></i>
+            <span class="text-sm font-bold text-red-700">Termination Letter</span>
+        </div>
+        <a href="/download/{{ c.term_filename }}" class="text-red-500"><i class="ri-download-cloud-2-line text-xl"></i></a>
+    </div>
+    {% endif %}
+</div>
+
+{% if c.status != 'signed' and c.offboarding_status != 'terminated' %}
+<div class="bg-brand-surface text-white p-5 rounded-3xl shadow-lg mb-6">
+    <h3 class="text-xs font-bold text-brand-gold uppercase tracking-wider mb-2">OIDC Integration</h3>
+    <p class="text-sm text-gray-400 mb-4">Identity verification and signing.</p>
+    <div class="flex gap-2">
+        <a href="/auth/mojeid/verify/{{ c.token }}" class="flex-1 bg-blue-600 text-white text-center py-2 rounded-xl text-xs font-bold">MojeID</a>
+    </div>
+</div>
+{% endif %}
+
+<div class="bg-white p-5 rounded-3xl shadow-sm mb-6">
+    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Development</h3>
+    {% for e in evals %}
+        <div class="mb-3 border-b border-gray-50 pb-2">
+            <div class="flex justify-between text-sm font-bold">
+                <span>Rating</span>
+                <span class="text-brand-gold">{% for i in range(e[2]) %}★{% endfor %}</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">{{ e[3] }}</p>
+        </div>
+    {% endfor %}
+    <form action="/manage/evaluate/{{ c.token }}" method="POST" class="mt-4 flex gap-2">
+        <input name="rating" type="number" min="1" max="5" placeholder="1-5" class="w-16 bg-gray-50 border-none p-2 rounded-xl outline-none text-sm">
+        <input name="note" placeholder="Notes..." class="flex-1 bg-gray-50 border-none p-2 rounded-xl outline-none text-sm">
+        <button class="bg-brand-gold text-brand-dark px-3 rounded-xl font-bold">+</button>
+    </form>
+</div>
+
+{% if c.offboarding_status != 'terminated' %}
+<form action="/manage/terminate/{{ c.token }}" method="POST" class="mt-10 mb-10">
+    <button class="w-full border border-red-200 text-red-500 hover:bg-red-50 py-4 rounded-xl font-bold transition">Terminate Employment</button>
+</form>
+{% endif %}
+{% endblock %}

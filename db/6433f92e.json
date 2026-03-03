@@ -1,0 +1,12 @@
+{
+    "personal_data": {
+        "name": "Emanuel",
+        "surname": "Testovaci",
+        "email": "emanuel@omega.cz"
+    },
+    "hr_data": {
+        "position": "Junior Developer",
+        "salary": "45000"
+    },
+    "token": "6433f92e"
+}

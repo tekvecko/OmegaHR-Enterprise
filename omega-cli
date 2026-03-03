@@ -1,0 +1,18 @@
+#!/data/data/com.termux/files/usr/bin/python
+import sys, sqlite3, uuid, datetime
+
+DB_FILE = "omega_database.db"
+
+def quick_onboard(name):
+    token = str(uuid.uuid4())[:8]
+    conn = sqlite3.connect(DB_FILE)
+    conn.execute("INSERT INTO candidates (token, name, status, hired_at) VALUES (?, ?, 'ACTIVE', ?)",
+                 (token, name, str(datetime.date.today())))
+    conn.commit()
+    conn.close()
+    print(f"🚀 [CLI] Zaměstnanec {name} vytvořen. Token: {token}")
+
+if len(sys.argv) > 2 and sys.argv[1] == "onboard":
+    quick_onboard(sys.argv[2])
+else:
+    print("Použití: omega-cli onboard 'Jméno'")
