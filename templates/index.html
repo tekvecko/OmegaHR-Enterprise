@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmegaHR Enterprise | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-950 text-gray-100">
+    <nav class="bg-gray-900 border-b border-gray-800 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-microchip text-blue-500 text-2xl"></i>
+                <span class="text-xl font-bold tracking-wider">OMEGA<span class="text-blue-500">HR</span></span>
+            </div>
+            <div class="flex gap-6 items-center">
+                <a href="/" class="text-blue-400 border-b-2 border-blue-400 pb-1">Dashboard</a>
+                <a href="/audit" class="hover:text-blue-400 transition">Audit Log</a>
+                <button onclick="runBackup()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-bold transition">
+                    <i class="fas fa-database mr-2"></i>ZÁLOHOVAT
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" id="statsContainer">
+            <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-lg">
+                <p class="text-gray-400 text-sm uppercase font-bold mb-1">HR Aktivity</p>
+                <p id="hr_count" class="text-3xl font-mono text-green-500">0</p>
+            </div>
+            <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-lg">
+                <p class="text-gray-400 text-sm uppercase font-bold mb-1">Bezpečnost</p>
+                <p id="sec_count" class="text-3xl font-mono text-red-500">0</p>
+            </div>
+            <div class="bg-gray-900 p-6 rounded-xl border border-gray-800 shadow-lg">
+                <p class="text-gray-400 text-sm uppercase font-bold mb-1">Systém</p>
+                <p id="sys_count" class="text-3xl font-mono text-blue-500">0</p>
+            </div>
+            <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 flex flex-col justify-center">
+                <a href="/new" class="bg-green-600 hover:bg-green-700 p-3 rounded text-center font-bold mb-2 transition">
+                   <i class="fas fa-user-plus mr-2"></i>NOVÝ NÁBOR
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 shadow-2xl">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-file-csv text-yellow-500 mr-2"></i>Rychlý Export
+                </h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <a href="/reports/export_csv" class="bg-gray-800 hover:bg-gray-700 p-4 rounded-lg border border-gray-700 text-center transition">
+                        <i class="fas fa-download mb-2 block text-2xl"></i>Export CSV
+                    </a>
+                    <button class="bg-gray-800 opacity-50 p-4 rounded-lg border border-gray-700 text-center cursor-not-allowed">
+                        <i class="fas fa-file-pdf mb-2 block text-2xl"></i>Hromadné PDF
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 shadow-2xl">
+                <h2 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-history text-blue-500 mr-2"></i>Poslední akce
+                </h2>
+                <div id="miniAudit" class="space-y-3 text-sm">
+                    <p class="text-gray-500 italic">Načítám data z auditu...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function updateStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                document.getElementById('hr_count').innerText = data.HR || 0;
+                document.getElementById('sec_count').innerText = data.Security || 0;
+                document.getElementById('sys_count').innerText = data.System || 0;
+            } catch(e) { console.error("Stats fail"); }
+        }
+
+        async function runBackup() {
+            if(!confirm("Spustit celkovou zálohu databáze?")) return;
+            const btn = event.target;
+            btn.innerText = "ZÁLOHUJI...";
+            const res = await fetch('/admin/backup');
+            if(res.ok) alert("Záloha byla úspěšně vytvořena v 'backups/'");
+            else alert("Chyba při zálohování.");
+            btn.innerHTML = '<i class="fas fa-database mr-2"></i>ZÁLOHOVAT';
+        }
+
+        setInterval(updateStats, 5000);
+        updateStats();
+        updateRecentLogs();
+    </script>
+</body>
+</html>

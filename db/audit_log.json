@@ -1,0 +1,10 @@
+[
+    {
+        "timestamp": "2026-03-03 09:29:34",
+        "user": "hacker",
+        "action": "Pokus o průnik",
+        "target": "Zabezpečení",
+        "details": "Heslo: 123",
+        "category": "Bezpečnost"
+    }
+]

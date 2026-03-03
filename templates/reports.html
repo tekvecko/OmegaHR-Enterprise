@@ -1,7 +1,73 @@
 {% extends "base.html" %}
+
+{% block title %}Reporty - OmegaHR{% endblock %}
+{% block header %}Reporty a Analytika{% endblock %}
+
 {% block content %}
-<h1 class="text-2xl font-bold mb-4 mt-4">Reports</h1>
-<div class="bg-white p-6 rounded-3xl text-center text-gray-500 shadow-sm border border-gray-100">
-    Reporting module is active. Data aggregation initialized.
+<div class="space-y-6">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5">
+            <div class="w-14 h-14 bg-green-50 text-green-500 rounded-xl flex items-center justify-center text-2xl"><i class="ri-money-czk-box-line"></i></div>
+            <div>
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-wide">Mzdové náklady / měsíc</p>
+                <h3 class="text-2xl font-black text-gray-900">{{ "{:,}".format(total_salaries).replace(',', ' ') }} Kč</h3>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5">
+            <div class="w-14 h-14 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center text-2xl"><i class="ri-team-line"></i></div>
+            <div>
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-wide">Počet aktivních osob</p>
+                <h3 class="text-2xl font-black text-gray-900">{{ emps|length }}</h3>
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5">
+            <div class="w-14 h-14 bg-purple-50 text-purple-500 rounded-xl flex items-center justify-center text-2xl"><i class="ri-line-chart-line"></i></div>
+            <div>
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-wide">Průměrná hrubá mzda</p>
+                <h3 class="text-2xl font-black text-gray-900">
+                    {% if emps|length > 0 %}
+                        {{ "{:,}".format((total_salaries / emps|length)|int).replace(',', ' ') }} Kč
+                    {% else %}
+                        0 Kč
+                    {% endif %}
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <h3 class="font-bold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-100 pb-4"><i class="ri-pie-chart-line text-gray-400"></i> Dle oddělení</h3>
+            <div class="space-y-4">
+                {% for dep, count in deps.items() %}
+                <div>
+                    <div class="flex justify-between text-sm font-bold text-gray-700 mb-1">
+                        <span>{{ dep }}</span>
+                        <span>{{ count }} os.</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2">
+                        <div class="bg-gray-900 h-2 rounded-full" style="width: {{ (count / emps|length * 100)|int if emps|length > 0 else 0 }}%"></div>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-sm text-gray-500 italic">Žádná data oddělení.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-center items-center text-center relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 opacity-5 text-gray-900"><i class="ri-file-excel-2-fill text-[200px]"></i></div>
+            <div class="relative z-10 max-w-md">
+                <div class="w-20 h-20 bg-gray-900 text-brand-gold rounded-3xl mx-auto flex items-center justify-center text-4xl mb-6 shadow-xl shadow-gray-900/20"><i class="ri-download-cloud-2-line"></i></div>
+                <h3 class="text-xl font-black text-gray-900 mb-2">Měsíční export podkladů</h3>
+                <p class="text-gray-500 text-sm mb-8">Stáhněte si kompletní databázi aktivních zaměstnanců, jejich aktuálních platů a úvazků. Vhodné pro mzdovou účetní a import do dalších systémů (např. Pohoda, Pamica).</p>
+                <a href="/reports/export_csv" class="inline-flex items-center gap-2 bg-gray-900 text-white hover:text-brand-gold px-8 py-4 rounded-xl font-black transition shadow-lg shadow-gray-900/20">
+                    <i class="ri-file-excel-2-line"></i> Stáhnout data jako CSV
+                </a>
+            </div>
+        </div>
+    </div>
+
 </div>
 {% endblock %}

@@ -1,1 +1,1 @@
-{"base_url": "https://p3085t3mscgc.share.zrok.io", "name": "Omega Corp", "address": "Unknown", "ceo": "Admin", "mojeid_client_id": "zz0B6jnfUtdi", "mojeid_client_secret": "a3a8d03a4239d5319b010e05c201118802746d50c1c0aec46c8ee75d", "bankid_client_id": "", "bankid_client_secret": ""}
+{"base_url": "http://localhost:5000", "name": null, "address": null, "ceo": null, "mojeid_client_id": null, "mojeid_client_secret": null, "bankid_client_id": null, "bankid_client_secret": null}

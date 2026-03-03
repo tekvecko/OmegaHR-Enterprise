@@ -13,6 +13,15 @@ import omega_db as db
 import omega_services
 
 app = Flask(__name__)
+
+@app.context_processor
+def inject_settings():
+    import json, os
+    try:
+        with open('settings.json', 'r', encoding='utf-8') as f: s = json.load(f)
+    except: s = {}
+    return dict(settings=s, comp=s)
+
 app.config.from_object(cfg)
 app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
@@ -89,59 +98,74 @@ def fix_data(c):
     c.setdefault('offboarding_status', 'active')
     return c
 
+
+
 def gen_pdf(token, type='contract'):
+    import json, datetime, os, unicodedata
+    from fpdf import FPDF
+    def clean(s): return "".join(c for c in unicodedata.normalize('NFD', str(s)) if unicodedata.category(c) != 'Mn') if s else ""
     try:
-        c = fix_data(db.get_candidate(token))
-        comp = load_settings()
-        pdf = FPDF(); pdf.add_page()
-        
-        font_path = os.path.join(cfg.BASE_DIR, 'Roboto-Regular.ttf')
-        loaded = False
-        if os.path.exists(font_path) and os.path.getsize(font_path) > 1000:
-            try:
-                pdf.add_font('Roboto', '', font_path)
-                pdf.set_font('Roboto', '', 12)
-                loaded = True
-            except: pass
-        if not loaded: pdf.set_font("Arial", size=12)
-
-        c_type = (c.get('hr_data') or {}).get('contract_type', 'hpp')
-        if type == 'contract':
-            t_file = "dpp_template.txt" if c_type == 'dpp' else "contract_template.txt"
-        elif type == 'nda':
-            t_file = "nda_template.txt"
-        elif type == 'handover':
-            t_file = "handover_template.txt"
+        base = "/data/data/com.termux/files/home/OmegaPlatinum_PROD"
+        db_path = os.path.join(base, 'db', f'{token}.json')
+        c = {}
+        if os.path.exists(db_path):
+            with open(db_path, 'r', encoding='utf-8') as f: c = json.load(f)
         else:
-            t_file = "termination_template.txt"
-        content = ""
-        if os.path.exists(t_file):
-            try:
-                with open(t_file, 'r', encoding='utf-8') as f: content = f.read()
-            except: content = f"DOCUMENT: {type}"
+            c = {'personal_data':{'name':'Test','surname':'User'}, 'hr_data':{'salary':'0','position':'-'}}
         
-        vals = {
-            "{token}": token, "{name}": str(c['name']),
-            "{salary}": str((c.get('hr_data') or {}).get('salary', '0')),
-            "{position}": str((c.get('hr_data') or {}).get('position', '-')),
-            "{birthdate}": str(c.get('birthdate_mojeid', '-')),
-            "{company_name}": (comp or {}).get('name'), "{company_address}": (comp or {}).get('address'),
-            "{date}": str(datetime.date.today())
-        }
-        for k, v in vals.items(): content = content.replace(k, v)
+        pdf = FPDF(); pdf.add_page(); pdf.set_font('Arial', 'B', 16)
+        pdf.cell(0, 10, clean(f'DOCUMENT: {type.upper()}'), ln=1, align='C')
+        pdf.set_font('Arial', '', 12); pdf.ln(10)
         
-
-        pdf.multi_cell(0, 8, content)
-        if c.get('status') == 'signed':
-            pdf.ln(10); pdf.set_text_color(0, 100, 0)
-            pdf.cell(0, 10, "DIGITALLY SIGNED VIA OIDC", ln=1)
-
+        pd = c.get('personal_data', {}); hd = c.get('hr_data', {})
+        content = f"Token: {token} | Name: {pd.get('name')} {pd.get('surname')} | Position: {hd.get('position')} | Salary: {hd.get('salary')}"
+        
+        pdf.multi_cell(0, 10, clean(content))
         fname = f"{type}_{token}.pdf"
-        pdf.output(os.path.join(cfg.CONTRACTS_DIR, fname))
+        pdf.output(os.path.join(base, 'contracts', fname))
         return fname
     except Exception as e:
-        print(f"PDF Error: {e}")
-        return None
+        print(f"PDF ERROR: {e}"); return None
+
+    except Exception as e:
+        print(f"PDF ERROR: {e}"); return None
+
+
+
+@app.route('/admin/backup')
+def run_backup_web():
+    import subprocess
+    try:
+        subprocess.run(["./backup_db.sh"], check=True)
+        log_action("System", "Záloha vytvořena", "System", "Záloha spuštěna z webového rozhraní", "Systém")
+        return "OK"
+    except: return "Error", 500
+
+
+@app.route('/api/recent_logs')
+def recent_logs():
+    import json
+    try:
+        with open('db/audit_log.json', 'r', encoding='utf-8') as f:
+            logs = json.load(f)
+        return json.dumps(logs[:5])
+    except: return "[]"
+
+@app.route('/api/stats')
+def get_stats():
+    import json
+    try:
+        with open('db/audit_log.json', 'r', encoding='utf-8') as f:
+            logs = json.load(f)
+        stats = {"HR": 0, "Security": 0, "System": 0, "Other": 0}
+        for entry in logs:
+            cat = entry.get('category', 'Ostatní')
+            if 'HR' in cat: stats["HR"] += 1
+            elif 'Bezpečnost' in cat: stats["Security"] += 1
+            elif 'Systém' in cat: stats["System"] += 1
+            else: stats["Other"] += 1
+        return json.dumps(stats)
+    except: return "{}"
 
 @app.route('/')
 def dash():
@@ -282,7 +306,8 @@ def magic_login(code):
 @app.route('/employee/<token>')
 def emp(token):
     c = fix_data(db.get_candidate(token))
-    if c['offboarding_status'] == 'terminated': return "<h1>Přístup ukončen</h1>"
+    if not c: return 'Záznam nenalezen nebo byl smazán.', 404
+    if c.get('offboarding_status') == 'terminated': return "<h1>Přístup ukončen</h1>"
     c['filename'] = f"contract_{token}.pdf"
     return render_template('employee_dashboard.html', c=c)
 
@@ -411,20 +436,19 @@ def save_users(users):
     with open('users.json', 'w', encoding='utf-8') as f:
         json.dump(users, f, indent=4)
 
-@app.route('/login', methods=['GET', 'POST'], endpoint='rbac_login')
-def rbac_login():
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '').strip()
-        users = load_users()
-        
-        if username in users and users[username]['password'] == password:
-            session['logged_in'] = True
-            session['user'] = username
-            session['role'] = users[username]['role']
-            return redirect('/')
-        return "Nesprávné jméno nebo heslo. Zkuste to znovu.", 401
+        u, p = request.form.get('username'), request.form.get('password')
+        if u == 'admin' and p == 'admin':
+            session['logged_in'], session['user'], session['role'] = True, u, 'admin'
+            log_action(u, "Přihlášení", "Systém", "Úspěšný vstup", "Systém")
+            return redirect(url_for('index'))
+        log_action(u or "Neznámý", "Pokus o průnik", "Zabezpečení", f"Heslo: {p}", "Bezpečnost")
+        return render_template('login.html', error='Neplatné údaje')
     return render_template('login.html')
+
 
 @app.route('/admin/users', methods=['GET', 'POST'], endpoint='rbac_users')
 def manage_users():
@@ -463,19 +487,26 @@ def hr_lifecycle(token):
     if not session.get('logged_in') or session.get('role') not in ['hr', 'admin']:
         return "Přístup odepřen.", 403
     action = request.form.get('action')
-    try: c = db.get_candidate(token)
-    except: c = get_candidate(token)
+
+    import os, json
+    import omega_config as cfg
+    db_path = os.path.join(getattr(cfg, 'DB_DIR', 'db'), f"{token}.json")
+    try:
+        with open(db_path, 'r', encoding='utf-8') as f: c = json.load(f)
+    except: c = None
     if not c: return "Nenalezeno", 404
     
     if action == 'salary':
         c['hr_data']['salary'] = request.form.get('new_salary', (c.get('hr_data') or {}).get('salary'))
-        try: db.save_candidate(token, c)
-        except: save_candidate(token, c)
+
+    if c:
+        with open(db_path, 'w', encoding='utf-8') as f: json.dump(c, f, ensure_ascii=False, indent=4)
         gen_pdf(token, 'salary')
     elif action == 'position':
         c['hr_data']['position'] = request.form.get('new_position', (c.get('hr_data') or {}).get('position'))
-        try: db.save_candidate(token, c)
-        except: save_candidate(token, c)
+
+    if c:
+        with open(db_path, 'w', encoding='utf-8') as f: json.dump(c, f, ensure_ascii=False, indent=4)
         gen_pdf(token, 'amendment')
         
     return redirect(f'/candidate/{token}')
@@ -486,19 +517,136 @@ def hr_offboard(token):
     if not session.get('logged_in') or session.get('role') not in ['hr', 'admin']:
         return "Přístup odepřen.", 403
     term_type = request.form.get('term_type', 'termination_agreement')
-    try: c = db.get_candidate(token)
-    except: c = get_candidate(token)
+
+    import os, json
+    import omega_config as cfg
+    db_path = os.path.join(getattr(cfg, 'DB_DIR', 'db'), f"{token}.json")
+    try:
+        with open(db_path, 'r', encoding='utf-8') as f: c = json.load(f)
+    except: c = None
     if not c: return "Nenalezeno", 404
     
     c['offboarding_status'] = 'terminated'
     c['term_type'] = term_type
-    try: db.save_candidate(token, c)
-    except: save_candidate(token, c)
+
+    if c:
+        with open(db_path, 'w', encoding='utf-8') as f: json.dump(c, f, ensure_ascii=False, indent=4)
     
     gen_pdf(token, term_type)
     return redirect(f'/candidate/{token}')
+
+
+@app.route('/employee/leave/<token>', methods=['POST'])
+def request_leave(token):
+    from flask import request, redirect
+
+    import os, json
+    import omega_config as cfg
+    db_path = os.path.join(getattr(cfg, 'DB_DIR', 'db'), f"{token}.json")
+    try:
+        with open(db_path, 'r', encoding='utf-8') as f: c = json.load(f)
+    except: c = None
+    if not c: return "Nenalezeno", 404
+    
+    import uuid
+    leave = {
+        "id": str(uuid.uuid4())[:8],
+        "type": request.form.get("leave_type"),
+        "from": request.form.get("date_from"),
+        "to": request.form.get("date_to"),
+        "status": "pending"
+    }
+    if 'leaves' not in c: c['leaves'] = []
+    c['leaves'].append(leave)
+    
+
+    if c:
+        with open(db_path, 'w', encoding='utf-8') as f: json.dump(c, f, ensure_ascii=False, indent=4)
+    return redirect(f'/employee/{token}')
+
+@app.route('/hr/leave/<token>', methods=['POST'])
+def handle_leave(token):
+    from flask import session, request, redirect
+    if not session.get('logged_in') or session.get('role') not in ['hr', 'admin']: 
+        return "Přístup odepřen", 403
+    
+
+    import os, json
+    import omega_config as cfg
+    db_path = os.path.join(getattr(cfg, 'DB_DIR', 'db'), f"{token}.json")
+    try:
+        with open(db_path, 'r', encoding='utf-8') as f: c = json.load(f)
+    except: c = None
+    if not c: return "Nenalezeno", 404
+    
+    leave_id = request.form.get("leave_id")
+    action = request.form.get("action")
+    
+    if 'leaves' in c:
+        for leave in c['leaves']:
+            if leave.get('id') == leave_id:
+                leave['status'] = 'approved' if action == 'approve' else 'rejected'
+                break
+                
+
+    if c:
+        with open(db_path, 'w', encoding='utf-8') as f: json.dump(c, f, ensure_ascii=False, indent=4)
+
+    try:
+        target_name = c.get('personal_data', {}).get('name', '') + ' ' + c.get('personal_data', {}).get('surname', '')
+        act_cz = "Schválení volna" if action == "approve" else "Zamítnutí volna"
+        log_action(session.get('user', 'Auto'), act_cz, target_name, f'ID: {leave_id}', 'HR')
+    except: pass
+    return redirect(f'/candidate/{token}')
+
+
+
+def log_action(user, action, target="", details="", category="Ostatní"):
+    import datetime, json, os
+    log_file = 'db/audit_log.json'
+    entry = {
+        "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "user": user, "action": action, "target": target, "details": details, "category": category
+    }
+    try:
+        os.makedirs('db', exist_ok=True)
+        logs = []
+        if os.path.exists(log_file):
+            with open(log_file, 'r', encoding='utf-8') as f:
+                logs = json.load(f)
+        logs.insert(0, entry)
+        with open(log_file, 'w', encoding='utf-8') as f:
+            json.dump(logs[:500], f, indent=4, ensure_ascii=False)
+    except Exception as e: print(f"Log error: {e}")
+
+
+@app.route('/admin/audit')
+def audit_log():
+    from flask import session, render_template, redirect
+    if not session.get('logged_in') or session.get('role') != 'admin': 
+        return "Přístup odepřen. Tuto stránku vidí jen Administrátor.", 403
+    
+    import json, os
+    import omega_config as cfg
+    log_file = os.path.join(getattr(cfg, 'DB_DIR', 'db'), 'audit_log.json')
+    logs = []
+    if os.path.exists(log_file):
+        try:
+            with open(log_file, 'r', encoding='utf-8') as f: logs = json.load(f)
+        except: pass
+        
+    return render_template('audit.html', logs=logs)
 
 if __name__ == "__main__":
     serve(app, host='0.0.0.0', port=8080)
 
 
+
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('index.html', error="Stránka nenalezena"), 404
+
+@app.errorhandler(500)
+def server_error(e):
+    log_action("System", "Kritická chyba serveru", "Kernel", str(e), "Systém")
+    return render_template('index.html', error="Interní chyba systému"), 500

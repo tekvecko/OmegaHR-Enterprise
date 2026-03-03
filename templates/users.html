@@ -1,90 +1,96 @@
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Správa Účtů - OmegaHR</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100 p-4 md:p-8 font-sans text-gray-800">
-    <div class="max-w-4xl mx-auto">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl md:text-3xl font-black">Řídící panel Admina</h1>
-            <a href="/" class="text-gray-500 hover:text-gray-800 font-bold transition"><i class="ri-arrow-left-line"></i> Zpět na Nástěnku</a>
-        </div>
+{% extends "base.html" %}
 
-        <div class="flex gap-2 mb-6 border-b border-gray-200 pb-2">
-            <a href="/admin/users" class="px-4 py-2 bg-gray-800 text-white font-bold rounded-lg shadow-sm">Správa účtů</a>
-            <a href="/admin/settings" class="px-4 py-2 text-gray-500 hover:text-gray-800 font-bold transition rounded-lg hover:bg-gray-50">Nastavení firmy</a>
-        </div>
-        
-        <div class="bg-white p-6 rounded-2xl shadow-sm mb-8 border border-gray-100">
-            <h2 class="text-sm font-bold mb-4 text-gray-700">Přidat nového uživatele</h2>
-            <form action="/admin/users" method="POST" class="flex flex-col md:flex-row gap-4 items-end">
+{% block title %}Správa Účtů - OmegaHR{% endblock %}
+{% block header %}Uživatelé a Role{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <div class="lg:col-span-1">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 sticky top-8">
+            <div class="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                <div class="w-10 h-10 bg-gray-900 text-brand-gold rounded-xl flex items-center justify-center text-xl shadow-md"><i class="ri-user-add-line"></i></div>
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800">Nový přístup</h2>
+                    <p class="text-xs text-gray-500">Založení nového účtu</p>
+                </div>
+            </div>
+            
+            <form action="/admin/users" method="POST" class="space-y-5">
                 <input type="hidden" name="action" value="add">
-                <div class="flex-1 w-full">
-                    <label class="block text-xs font-bold text-gray-500 mb-1">Jméno</label>
-                    <input type="text" name="username" required class="w-full bg-gray-50 p-2.5 rounded-xl outline-none border border-gray-100">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Login (Jméno)</label>
+                    <div class="relative">
+                        <i class="ri-user-line absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" name="username" required class="w-full bg-gray-50 pl-11 p-3.5 rounded-xl outline-none border border-gray-200 focus:border-gray-400 focus:bg-white transition text-sm font-bold text-gray-700">
+                    </div>
                 </div>
-                <div class="flex-1 w-full">
-                    <label class="block text-xs font-bold text-gray-500 mb-1">Heslo</label>
-                    <input type="text" name="password" required class="w-full bg-gray-50 p-2.5 rounded-xl outline-none border border-gray-100">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Heslo</label>
+                    <div class="relative">
+                        <i class="ri-lock-line absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input type="password" name="password" required class="w-full bg-gray-50 pl-11 p-3.5 rounded-xl outline-none border border-gray-200 focus:border-gray-400 focus:bg-white transition text-sm font-bold text-gray-700">
+                    </div>
                 </div>
-                <div class="flex-1 w-full">
-                    <label class="block text-xs font-bold text-gray-500 mb-1">Role</label>
-                    <select name="role" class="w-full bg-gray-50 p-2.5 rounded-xl outline-none border border-gray-100">
-                        <option value="hr">HR Pracovník</option>
-                        <option value="admin">Administrátor</option>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Oprávnění (Role)</label>
+                    <select name="role" class="w-full bg-gray-50 p-3.5 rounded-xl outline-none border border-gray-200 focus:border-gray-400 focus:bg-white transition text-sm font-bold text-gray-700 appearance-none">
+                        <option value="hr">HR Specialista (Jen zaměstnanci)</option>
+                        <option value="admin">Administrátor (Plný přístup)</option>
                     </select>
                 </div>
-                <button type="submit" class="bg-gray-800 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-black transition w-full md:w-auto"><i class="ri-user-add-line"></i></button>
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-gray-900 text-white px-4 py-3.5 rounded-xl font-black hover:bg-black transition shadow-lg shadow-gray-900/20 flex items-center justify-center gap-2">
+                        <i class="ri-add-line text-lg"></i> Vytvořit účet
+                    </button>
+                </div>
             </form>
         </div>
+    </div>
 
-        <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-            <table class="w-full text-left">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="p-4 text-xs font-bold text-gray-500 uppercase">Uživatel</th>
-                        <th class="p-4 text-xs font-bold text-gray-500 uppercase">Role</th>
-                        <th class="p-4 text-xs font-bold text-gray-500 uppercase">Změna hesla</th>
-                        <th class="p-4 text-xs font-bold text-gray-500 uppercase">Odstranit</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    {% for uname, udata in users.items() %}
-                    <tr>
-                        <td class="p-4 font-bold text-gray-700">{{ uname }}</td>
-                        <td class="p-4">
-                            {% if udata.role == 'admin' %}
-                            <span class="bg-red-50 text-red-600 px-2 py-1 rounded text-xs font-bold">Admin</span>
-                            {% else %}
-                            <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-bold">HR</span>
-                            {% endif %}
-                        </td>
-                        <td class="p-4">
-                            <form action="/admin/users" method="POST" class="flex items-center gap-2">
-                                <input type="hidden" name="action" value="change_password">
-                                <input type="hidden" name="username" value="{{ uname }}">
-                                <input type="text" name="new_password" placeholder="Nové heslo" required class="w-24 bg-gray-50 border border-gray-200 rounded px-2 py-1 text-xs outline-none focus:border-gray-400">
-                                <button type="submit" class="bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs font-bold hover:bg-gray-300 transition">Změnit</button>
-                            </form>
-                        </td>
-                        <td class="p-4">
-                            {% if uname != 'admin' %}
-                            <form action="/admin/users" method="POST">
-                                <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="username" value="{{ uname }}">
-                                <button type="submit" class="text-red-400 hover:text-red-600 font-bold transition"><i class="ri-delete-bin-line"></i></button>
-                            </form>
-                            {% endif %}
-                        </td>
-                    </tr>
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <h2 class="text-lg font-bold text-gray-800">Seznam aktivních účtů</h2>
+                <span class="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold border border-blue-200">{{ users|length }} účtů</span>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 gap-4">
+                    {% for username, data in users.items() %}
+                    <div class="flex items-center justify-between p-5 rounded-2xl border border-gray-100 hover:border-gray-300 hover:bg-gray-50/50 transition shadow-sm group">
+                        <div class="flex items-center gap-5">
+                            <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-gray-800 font-black border border-gray-200 text-lg shadow-sm">
+                                {{ username[0]|upper }}
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-900 text-base mb-0.5">{{ username }}</p>
+                                {% if data.role == 'admin' %}
+                                    <span class="text-[10px] font-black bg-red-100 text-red-600 px-2 py-0.5 rounded border border-red-200 uppercase tracking-widest">Admin</span>
+                                {% else %}
+                                    <span class="text-[10px] font-black bg-gray-200 text-gray-600 px-2 py-0.5 rounded border border-gray-300 uppercase tracking-widest">HR Spec</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if username != 'admin' %}
+                        <form action="/admin/users" method="POST" onsubmit="return confirm('Opravdu nenávratně smazat účet {{ username }}?');">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="username" value="{{ username }}">
+                            <button type="submit" class="w-10 h-10 rounded-xl bg-white border border-gray-200 text-gray-400 hover:bg-red-50 hover:text-red-600 hover:border-red-200 flex items-center justify-center transition shadow-sm group-hover:opacity-100" title="Smazat uživatele">
+                                <i class="ri-delete-bin-line text-lg"></i>
+                            </button>
+                        </form>
+                        {% else %}
+                        <div class="flex items-center gap-2">
+                            <i class="ri-shield-star-line text-brand-gold text-xl" title="Hlavní administrátor"></i>
+                        </div>
+                        {% endif %}
+                    </div>
                     {% endfor %}
-                </tbody>
-            </table>
+                </div>
+            </div>
         </div>
     </div>
-</body>
-</html>
+    
+</div>
+{% endblock %}
