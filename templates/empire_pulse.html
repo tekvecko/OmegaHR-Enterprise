@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="page-anim">
+    <h1><i class="fa-solid fa-heart-pulse"></i> Empire Pulse</h1>
+    
+    <div class="grid">
+        <div class="card" style="border-bottom: 4px solid var(--accent);">
+            <h3>Ověřeno (MojeID)</h3>
+            <p style="font-size: 2rem; font-weight: 800;">{{ stats.verified }}</p>
+        </div>
+        <div class="card" style="border-bottom: 4px solid #48bb78;">
+            <h3>Aktivní Smlouvy</h3>
+            <p style="font-size: 2rem; font-weight: 800;">{{ stats.active }}</p>
+        </div>
+        <div class="card" style="border-bottom: 4px solid #ed8936;">
+            <h3>Celkem Subjektů</h3>
+            <p style="font-size: 2rem; font-weight: 800;">{{ stats.total }}</p>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:30px;">
+        <h2><i class="fa-solid fa-wave-square"></i> Živý tok událostí (Kernel Logs)</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr><th>ČAS</th><th>ZDROJ</th><th>AKCE</th><th>DETAIL</th></tr>
+                </thead>
+                <tbody>
+                    {% for log in events %}
+                    <tr style="opacity: {{ 1.0 - (loop.index0 / 15) }};">
+                        <td><small>{{ log.timestamp }}</small></td>
+                        <td><span class="badge" style="background:rgba(0,210,255,0.1); color:var(--accent);">{{ log.user }}</span></td>
+                        <td><strong>{{ log.action }}</strong></td>
+                        <td>{{ log.details }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

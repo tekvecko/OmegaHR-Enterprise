@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="glass-header">
+    <h1>Digitální archiv</h1>
+</div>
+
+<div class="card">
+    <table>
+        <thead><tr><th>Jméno</th><th>Status</th><th>Hash podpisu</th><th>Dokument</th></tr></thead>
+        <tbody>
+            {% for e in employees %}
+            <tr>
+                <td>{{ e.name }}</td>
+                <td>{{ e.status }}</td>
+                <td><small>{{ e.contract_hash or "Nepodepsáno" }}</small></td>
+                <td><a href="/api/sign_contract/{{ e.token }}" class="btn btn-p">Podepsat</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

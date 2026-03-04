@@ -1,5 +1,37 @@
-{% extends 'layout.html' %}
-{% block content %}
+#!/data/data/com.termux/files/usr/bin/bash
+set -e
+
+PROJ="/data/data/com.termux/files/home/OmegaPlatinum_PROD"
+cd $PROJ
+
+echo "📡 Aktivuji Verifikační Portál a Badge Engine..."
+
+# 1. Update jádra o Badge logiku
+python3 << 'PYEOF'
+path = "omega_core.py"
+with open(path, 'r') as f:
+    content = f.read()
+
+badge_logic = """
+@app.route('/badge/<token>')
+def badge(token):
+    # Veřejný endpoint - bez nutnosti login
+    emp = query_db("SELECT * FROM candidates WHERE token=?", (token,), one=True)
+    if not emp: return "Neplatný verifikační token", 404
+    
+    # Získání majetku pro badge
+    assets = query_db("SELECT name FROM assets WHERE owner_token=?", (token,))
+    return render_template('welcome_portal.html', emp=emp, assets=assets)
+"""
+
+if "@app.route('/badge/<token>')" not in content:
+    content = content.replace("if __name__ == '__main__':", badge_logic + "\nif __name__ == '__main__':")
+    with open(path, 'w') as f:
+        f.write(content)
+PYEOF
+
+# 2. Vytvoření šablony welcome_portal.html (Badge)
+cat > templates/welcome_portal.html << 'HOF'
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -38,5 +70,10 @@
     </div>
 </body>
 </html>
+HOF
 
-{% endblock %}
+echo "🚀 Restartuji systém s aktivním Badge portálem..."
+pkill -f "omega_core.py" || true
+nohup python3 $PROJ/omega_core.py > $PROJ/dev_server.log 2>&1 &
+
+echo "✅ HOTOVO. Veřejné badge jsou aktivní na /badge/<token>."

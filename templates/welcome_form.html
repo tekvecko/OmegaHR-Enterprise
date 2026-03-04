@@ -1,0 +1,55 @@
+{% extends 'layout.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omega | Welcome</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+    :root {
+        --bg: #f4f7f9;
+        --card-bg: #ffffff;
+        --primary: #0062cc;
+        --secondary: #5a6268;
+        --text: #2c3e50;
+        --border: #e1e8ed;
+        --success: #28a745;
+        --danger: #dc3545;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; padding: 15px; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    h1, h2 { color: var(--primary); margin-top: 0; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; font-size: 0.9rem; }
+    .btn-primary { background: var(--primary); color: white; border: none; }
+    .btn-primary:hover { background: #004da3; }
+    input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 1rem; background: #fff; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid var(--primary); }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
+ .mojeid-btn { background: #fff; color: #000; border: 1px solid #ccc; width: 100%; margin-bottom: 20px; }</style>
+</head>
+<body>
+    <div class="container" style="margin-top: 50px;">
+        <div class="card" style="text-align: center;">
+            <div style="font-size: 3rem; color: var(--primary); margin-bottom: 10px;"><i class="fa-solid fa-gem"></i></div>
+            <h1>Vítejte v OMEGA</h1>
+            <p style="color: var(--secondary); margin-bottom: 30px;">Pro zahájení náboru a bezpečné generování dokumentů se prosím ověřte.</p>
+            
+            <a href="/auth/mojeid/verify/{{ token }}" class="btn mojeid-btn">
+                <img src="https://mojeid.cz/static/img/logo.png" style="height:20px; margin-right:10px; vertical-align:middle;">
+                Ověřit přes MojeID
+            </a>
+
+            <div style="margin: 20px 0; color: #ccc;">— nebo ruční zápis —</div>
+
+            <form method="POST">
+                <input type="text" name="name" placeholder="Celé jméno" required>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Pokračovat k registraci</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+
+{% endblock %}

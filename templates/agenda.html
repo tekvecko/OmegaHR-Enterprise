@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h1><i class="fa-solid fa-user-plus"></i> HR Agenda</h1>
+<div class="grid">
+    {% for e in employees %}
+    <div class="card">
+        <div style="display:flex; justify-content:space-between;">
+            <h3>{{ e.name }}</h3>
+            <span class="badge" style="background:rgba(0,210,255,0.2); color:white; padding:5px 10px; border-radius:10px;">{{ e.token }}</span>
+        </div>
+        <hr style="margin:15px 0; border:0; border-top:1px solid rgba(255,255,255,0.1);">
+        <form action="/api/update_agenda/{{ e.token }}" method="POST">
+            <label style="font-size:0.7rem;">TYP SMLOUVY</label>
+            <select name="contract_type" style="background:rgba(255,255,255,0.1); color:white; border:1px solid var(--glass-border); padding:8px; width:100%; border-radius:10px; margin-bottom:10px;">
+                <option value="HPP" {% if e.contract_type == 'HPP' %}selected{% endif %}>HPP (Zaměstnanec)</option>
+                <option value="ICO" {% if e.contract_type == 'ICO' %}selected{% endif %}>IČO (Kontraktor)</option>
+            </select>
+            <label style="font-size:0.7rem;">DATUM NÁSTUPU</label>
+            <input type="date" name="start_date" value="{{ e.start_date }}" style="background:rgba(255,255,255,0.1); color:white; border:1px solid var(--glass-border); padding:8px; width:100%; border-radius:10px; margin-bottom:15px;">
+            <button type="submit" class="btn" style="width:100%;">AKTUALIZOVAT</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

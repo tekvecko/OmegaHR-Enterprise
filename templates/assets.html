@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h1><i class="fa-solid fa-boxes-stacked"></i> Logistika</h1>
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr><th>ID</th><th>ZAŘÍZENÍ</th><th>STATUS</th><th>DRŽITEL</th><th>AKCE</th></tr>
+            </thead>
+            <tbody>
+                {% for a in assets %}
+                <tr>
+                    <td><code>#{{ a.id }}</code></td>
+                    <td><strong>{{ a.name }}</strong></td>
+                    <td>{{ a.status }}</td>
+                    <td>{{ a.owner_token or "SKLADEM" }}</td>
+                    <td>
+                        {% if a.owner_token %}
+                        <a href="/api/unassign_asset/{{ a.id }}" style="color:#ff8a8a; text-decoration:none;"><i class="fa-solid fa-arrow-rotate-left"></i> Uvolnit</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

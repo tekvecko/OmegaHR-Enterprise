@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="glass-header">
+    <h1>Správa operátorů</h1>
+</div>
+
+<div class="card">
+    <table>
+        <thead><tr><th>Uživatel</th><th>Role</th><th>Poslední akce</th></tr></thead>
+        <tbody>
+            {% for e in employees %}
+            <tr>
+                <td>{{ e.name }}</td>
+                <td>Operátor</td>
+                <td>{{ e.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

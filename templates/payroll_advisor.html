@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="page-anim">
+    <h1><i class="fa-solid fa-hand-holding-dollar"></i> Smart Payroll Advisor</h1>
+    
+    <div class="card" style="border-left: 5px solid #48bb78; background: rgba(72, 187, 120, 0.05);">
+        <h2 style="color: #2f855a;"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Optimalizace mezd</h2>
+        <div style="line-height: 1.8; margin-top: 20px; font-family: 'Inter', sans-serif;">
+            {{ report | replace('\n', '<br>') | safe }}
+        </div>
+    </div>
+
+    <div class="card">
+        <h3><i class="fa-solid fa-circle-info"></i> Jak to funguje?</h3>
+        <p style="font-size: 0.9rem; opacity: 0.8;">
+            Model Gemini 2.0 Flash analyzuje aktuální mzdové náklady a statusy operátorů. 
+            Návrhy jsou generovány v reálném čase s ohledem na udržitelnost cashflow impéria.
+        </p>
+    </div>
+</div>
+{% endblock %}

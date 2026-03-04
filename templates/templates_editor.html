@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="page-anim">
+    <h1><i class="fa-solid fa-pen-nib"></i> Editor šablon</h1>
+    <div class="card">
+        <form method="POST">
+            <label>Text pracovní smlouvy (používejte {name}, {position}, {salary})</label>
+            <textarea name="body" style="width:100%; height:300px; background:rgba(255,255,255,0.1); color:white; border:1px solid var(--glass-border); border-radius:15px; padding:20px; font-family:monospace; margin-top:10px;">{{ template.body }}</textarea>
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button type="submit" class="btn btn-p">ULOŽIT ŠABLONU</button>
+                <a href="/api/generate_bulk" class="btn" style="background:#48bb78; color:white;"><i class="fa-solid fa-layer-group"></i> GENEROVAT PRO VŠECHNY</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

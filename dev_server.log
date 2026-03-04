@@ -1,4 +1,42 @@
-  File "/data/data/com.termux/files/home/OmegaPlatinum_PROD/omega_core.py", line 59
-    return render_template('index.html', employees=employees, stock=stock, asset_map=asset_map, count=len(employees), asset_map=asset_map, stock=stock)
-                                                                                                                                           ^^^^^^^^^^^
-SyntaxError: keyword argument repeated: stock
+ * Serving Flask app 'omega_core'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://100.114.219.46:8080
+[33mPress CTRL+C to quit[0m
+127.0.0.1 - - [04/Mar/2026 22:28:52] "GET /agenda HTTP/1.1" 200 -
+127.0.0.1 - - [04/Mar/2026 22:28:53] "[36mGET /static/omega_master.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [04/Mar/2026 22:29:03] "GET /admin/identities HTTP/1.1" 200 -
+127.0.0.1 - - [04/Mar/2026 22:29:03] "[36mGET /static/omega_master.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [04/Mar/2026 22:29:08] "GET /manage/users HTTP/1.1" 200 -
+127.0.0.1 - - [04/Mar/2026 22:29:08] "[36mGET /static/omega_master.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [04/Mar/2026 22:29:11] "GET /audit HTTP/1.1" 200 -
+127.0.0.1 - - [04/Mar/2026 22:29:11] "[36mGET /static/omega_master.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [04/Mar/2026 22:29:13] "GET /manage/contracts HTTP/1.1" 200 -
+127.0.0.1 - - [04/Mar/2026 22:29:14] "[36mGET /static/omega_master.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [04/Mar/2026 22:29:24] "GET /manage/contracts HTTP/1.1" 200 -
+127.0.0.1 - - [04/Mar/2026 22:29:24] "[36mGET /static/omega_master.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [04/Mar/2026 22:29:27] "GET /agenda HTTP/1.1" 200 -
+127.0.0.1 - - [04/Mar/2026 22:29:27] "[36mGET /static/omega_master.css HTTP/1.1[0m" 304 -
+[2026-03-04 22:29:31,452] ERROR in app: Exception on / [GET]
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/data/data/com.termux/files/usr/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/data/data/com.termux/files/usr/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/data/data/com.termux/files/usr/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/OmegaPlatinum_PROD/omega_core.py", line 51, in index
+    for e in query_db('SELECT token FROM candidates'): sync_empire_heart(e['token'])
+                                                       ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/OmegaPlatinum_PROD/omega_core.py", line 271, in sync_empire_heart
+    generate_pdf_contract(updated_e) # Volame jiz existujici PDF engine
+    ^^^^^^^^^^^^^^^^^^^^^
+NameError: name 'generate_pdf_contract' is not defined
+127.0.0.1 - - [04/Mar/2026 22:29:31] "[35m[1mGET / HTTP/1.1[0m" 500 -
+127.0.0.1 - - [04/Mar/2026 22:29:33] "GET /agenda HTTP/1.1" 200 -
+127.0.0.1 - - [04/Mar/2026 22:29:34] "[36mGET /static/omega_master.css HTTP/1.1[0m" 304 -

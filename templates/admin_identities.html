@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h1><i class="fa-solid fa-shield-halved"></i> MojeID & GDPR</h1>
+<div class="grid">
+    {% for u in users %}
+    <div class="card">
+        <h3>{{ u.name }}</h3>
+        <p style="font-size:0.8rem; opacity:0.7;">TOKEN: {{ u.token }}</p>
+        <p style="margin:10px 0;">Status: <strong>{{ "VERIFIED" if u.is_verified else "UNVERIFIED" }}</strong></p>
+        <div style="display:flex; gap:10px;">
+            <a href="/my_data/{{ u.token }}" class="btn" style="flex:1; background:rgba(255,255,255,0.1); font-size:0.7rem;">EXPORT GDPR</a>
+            <a href="/admin/reset_identity/{{ u.token }}" class="btn" style="flex:1; background:#ff4d4d; font-size:0.7rem;">RESET</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

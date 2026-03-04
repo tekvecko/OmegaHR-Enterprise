@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+{% block content %}
+<h1><i class="fa-solid fa-coins"></i> Finanční Analytika</h1>
+<div class="card">
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr><th>OPERÁTOR</th><th>BRUTTO</th><th>NETTO (EST.)</th><th>COSTS</th></tr>
+            </thead>
+            <tbody>
+                {% for s in stats %}
+                <tr>
+                    <td><strong>{{ s.name }}</strong></td>
+                    <td>{{ s.brutto }} CZK</td>
+                    <td style="color:#00d2ff;">{{ s.netto|round(2) }} CZK</td>
+                    <td style="font-weight:bold;">{{ s.cost|round(2) }} CZK</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div style="text-align:right; margin-top:20px; font-size:1.5rem; font-weight:900;">
+        CELKEM: {{ total|round(2) }} CZK
+    </div>
+</div>
+{% endblock %}

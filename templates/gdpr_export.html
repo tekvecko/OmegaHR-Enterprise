@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+{% block content %}
+<!DOCTYPE html><html><head><style>body{font-family:monospace;padding:30px;background:#f4f4f4}.card{background:#fff;padding:40px;border:1px solid #ccc;max-width:600px;margin:auto}</style></head><body>
+<div class="card"><h2>OMEGA PLATINUM - GDPR DATA EXPORT</h2><hr>
+<p>Dle článku 15 GDPR vám poskytujeme přehled zpracovávaných údajů:</p>
+<pre>{{ u | tojson(indent=4) }}</pre>
+<button onclick="window.print()">Vytisknout export</button></div></body></html>
+
+{% endblock %}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omega | {{ title }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/omega_master.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div style="font-weight: 900; color: var(--accent); font-size: 1.5rem; margin-bottom: 40px; padding-left: 10px;">
+                <i class="fa-solid fa-gem"></i> OMEGA
+            </div>
+            <nav>
+                <a href="/admin/pulse" class="nav-item"><i class="fa-solid fa-heart-pulse"></i> Empire Pulse</a>
+                <a href="/" class="nav-item"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+                <a href="/agenda" class="nav-item"><i class="fa-solid fa-users"></i> HR Agenda</a>
+                <a href="/assets" class="nav-item"><i class="fa-solid fa-laptop"></i> Logistika</a>
+                <a href="/manage/contracts" class="nav-item"><i class="fa-solid fa-file-signature"></i> Smlouvy</a>
+                <a href="/admin/finance" class="nav-item"><i class="fa-solid fa-coins"></i> Finance</a>
+                <a href="/manage/users" class="nav-item"><i class="fa-solid fa-user-shield"></i> Správa účtů</a>
+                <a href="/admin/identities" class="nav-item"><i class="fa-solid fa-fingerprint"></i> MojeID & GDPR</a>
+                <a href="/audit" class="nav-item"><i class="fa-solid fa-list-ul"></i> Audit Trail</a>
+            </nav>
+        </aside>
+        <main class="main-content page-anim">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,554 @@
+import json
+import os
+import sqlite3
+import hashlib
+from datetime import datetime
+from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory
+
+#!/data/data/com.termux/files/usr/bin/python
+import os, sqlite3
+from flask import Flask, request, session, redirect, url_for, render_template, send_from_directory, jsonify
+from fpdf import FPDF
+
+# LOAD GLOBAL CONFIG
+with open('omega_config.json', 'r') as f:
+    CONFIG = json.load(f)
+
+app = Flask(__name__)
+from authlib.integrations.flask_client import OAuth
+oauth = OAuth(app)
+mojeid = oauth.register(
+    name='mojeid',
+    client_id=os.getenv("MOJEID_CLIENT_ID"),
+    client_secret=os.getenv("MOJEID_CLIENT_SECRET"),
+    server_metadata_url='https://mojeid.cz/.well-known/openid-configuration',
+    client_kwargs={'scope': 'openid profile address email'}
+)
+
+app.secret_key = os.getenv("API_KEY", CONFIG["security"]["session_timeout_minutes"])
+
+BASE_DIR = "/data/data/com.termux/files/home/OmegaPlatinum_PROD"
+DB_FILE = os.path.join(BASE_DIR, "omega_database.db")
+CONTRACTS_DIR = os.path.join(BASE_DIR, "contracts")
+FONT_PATH = os.path.join(BASE_DIR, "fonts/System-Roboto.ttf")
+
+os.makedirs(CONTRACTS_DIR, exist_ok=True)
+
+
+def log_action(user, action, details):
+    query_db("INSERT INTO audit_logs (user, action, details) VALUES (?, ?, ?)", (user, action, details))
+
+def query_db(query, args=(), one=False):
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute(query, args)
+    rv = cur.fetchall()
+    conn.commit()
+    conn.close()
+    return (rv[0] if rv else None) if one else rv
+
+
+@app.route('/admin/delete/<token>')
+def delete_candidate(token):
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    # Najdeme majetek přiřazený tomuto tokenu
+    emp = query_db("SELECT name FROM candidates WHERE token=?", (token,), one=True)
+    if emp:
+        # Logování do historie před uvolněním
+        assets = query_db("SELECT id FROM assets WHERE owner=?", (emp['name'],))
+        for asset in assets:
+            query_db("INSERT INTO asset_history (asset_id, previous_owner) VALUES (?, ?)", 
+                     (asset['id'], emp['name']))
+        # Uvolnění majetku zpět do skladu
+        query_db("UPDATE assets SET owner='Available', status='IN_STOCK' WHERE owner=?", (emp['name'],))
+        # Smazání uživatele
+        query_db("DELETE FROM candidates WHERE token=?", (token,))
+        log_action(session.get('user'), "DELETE_USER", f"Token {token} deleted, assets returned.")
+    return redirect(url_for('index'))
+
+@app.route('/admin/users')
+def manage_users():
+    if session.get('role') != 'SUPERADMIN': return "Access Denied", 403
+    users = query_db("SELECT id, username, role, failed_attempts FROM users")
+    return render_template('users.html', users=users)
+
+@app.route('/')
+def index():
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    employees = query_db("SELECT * FROM candidates WHERE status != 'TERMINATED'")
+    stock = query_db("SELECT name, count(*) as count FROM assets WHERE owner_token IS NULL GROUP BY name")
+    assets_raw = query_db("SELECT * FROM assets")
+    asset_map = {}
+    for a in assets_raw:
+        token = a['owner_token']
+        if token:
+            if token not in asset_map: asset_map[token] = []
+            asset_map[token].append(a)
+    return render_template('index.html', employees=employees, stock=stock, asset_map=asset_map, count=len(employees))
+
+@app.route('/generate_contract/<token>')
+def generate_contract(token):
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    emp = query_db("SELECT * FROM candidates WHERE token=?", (token,), one=True)
+    if not emp: return "Employee not found", 404
+
+    try:
+        pdf = FPDF()
+        pdf.add_font('Roboto', '', FONT_PATH)
+        pdf.add_page()
+        pdf.set_font('Roboto', size=16)
+        pdf.cell(190, 10, text="PRACOVNÍ SMLOUVA OMEGA PLATINUM", align='C')
+        pdf.ln(20)
+        pdf.set_font('Roboto', size=12)
+        pdf.cell(190, 10, text=f"Zaměstnanec: {emp['name']}", align='L')
+        pdf.ln(10)
+        pdf.cell(190, 10, text=f"Identifikátor: {emp['mojeid_sub'] or 'N/A'}", align='L')
+        pdf.ln(10)
+        pdf.cell(190, 10, text=f"Datum nástupu: {emp['hired_at']}", align='L')
+        
+        filename = f"Smlouva_{token}.pdf"
+        dest = os.path.join(CONTRACTS_DIR, filename)
+        pdf.output(dest)
+        return send_from_directory(CONTRACTS_DIR, filename)
+    except Exception as e:
+        return f"Chyba při generování: {str(e)}", 500
+
+@app.route('/api/stats')
+def get_stats():
+    count = query_db("SELECT count(*) as count FROM candidates WHERE status='ACTIVE'", one=True)['count']
+    return jsonify({"active_personnel": count})
+
+
+import hashlib
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        user = request.form.get('username')
+        pw = request.form.get('password')
+        pw_hash = hashlib.sha256(pw.encode()).hexdigest()
+        
+        account = query_db("SELECT * FROM users WHERE username=?", (user,), one=True)
+        
+        if account:
+            if account['failed_attempts'] >= 5:
+                log_action(user, "LOGIN_BLOCKED", "Too many failed attempts")
+                return "Účet je zablokován. Kontaktujte systémového správce.", 403
+            
+            if account['password_hash'] == pw_hash:
+                session.clear()
+                session['logged_in'] = True
+                session['user'] = user
+                session['role'] = account['role']
+                query_db("UPDATE users SET failed_attempts=0, last_login=CURRENT_TIMESTAMP WHERE username=?", (user,))
+                log_action(user, "LOGIN", "Success")
+                return redirect(url_for('index'))
+            else:
+                query_db("UPDATE users SET failed_attempts = failed_attempts + 1 WHERE username=?", (user,))
+                log_action(user, "LOGIN_FAIL", f"Wrong password for {user}")
+        
+        return "Neplatné přihlašovací údaje", 401
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+
+@app.route('/new', methods=['GET', 'POST'])
+def new_candidate():
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    if request.method == 'POST':
+        name = request.form.get('name')
+        token = request.form.get('token') or str(os.urandom(4).hex().upper())
+        mojeid = request.form.get('mojeid')
+        query_db("INSERT INTO candidates (token, name, mojeid_sub, status, hired_at) VALUES (?, ?, ?, 'ACTIVE', DATE('now'))",
+                 (token, name, mojeid))
+        return redirect(url_for('index'))
+    return render_template('new.html')
+
+@app.route('/assign_asset', methods=['POST'])
+def assign_asset():
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    token = request.form.get('token')
+    asset_name = request.form.get('asset_name')
+    # Přiřadí první volný asset daného jména uživateli
+    query_db("UPDATE assets SET owner_token = ? WHERE name = ? AND owner_token IS NULL LIMIT 1", (token, asset_name))
+    return redirect(url_for('index'))
+
+
+@app.route('/badge/<token>')
+def badge(token):
+    # Veřejný endpoint - bez nutnosti login
+    emp = query_db("SELECT * FROM candidates WHERE token=?", (token,), one=True)
+    if not emp: return "Neplatný verifikační token", 404
+    
+    # Získání majetku pro badge
+    assets = query_db("SELECT name FROM assets WHERE owner_token=?", (token,))
+    return render_template('welcome_portal.html', emp=emp, assets=assets)
+
+
+@app.route('/api/stats_full')
+def stats_full():
+    assigned = query_db("SELECT count(*) as c FROM assets WHERE owner_token IS NOT NULL", one=True)['c']
+    available = query_db("SELECT count(*) as c FROM assets WHERE owner_token IS NULL", one=True)['c']
+    return jsonify({"assigned": assigned, "available": available})
+
+@app.route('/analytics')
+def analytics_page():
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    return render_template('analytics.html')
+
+
+@app.route('/welcome/<token>', methods=['GET', 'POST'])
+def welcome_portal(token):
+    # Ověření, zda token existuje a je ve stavu PENDING (nebo nově vytvořený)
+    emp = query_db("SELECT * FROM candidates WHERE token=?", (token,), one=True)
+    if not emp:
+        return "<h1>Neplatný nebo expirovaný přístupový klíč.</h1>", 403
+    
+    if request.method == 'POST':
+        real_name = request.form.get('name')
+        mojeid_sub = request.form.get('mojeid')
+        
+        # Update databáze daty od uživatele
+        query_db("UPDATE candidates SET name=?, mojeid_sub=?, status='ACTIVE' WHERE token=?", 
+                 (real_name, mojeid_sub, token))
+        
+        return render_template('welcome_portal.html', emp={'name': real_name, 'token': token}, success=True)
+    
+    return render_template('welcome_form.html', token=token)
+
+
+import subprocess
+import re
+
+@app.route('/api/network_scan')
+def network_scan():
+    if not session.get('logged_in'): return jsonify([])
+    try:
+        # Rychlý ping scan lokální sítě (předpokládáme 192.168.0.0/24 dle logů)
+        # Upravte masku podle potřeby, nebo použijeme '192.168.1.0/24'
+        cmd = "nmap -sn 192.168.0.0/24"
+        result = subprocess.check_output(cmd, shell=True).decode()
+        ips = re.findall(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})', result)
+        # Odfiltrujeme localhost (v Termuxu obvykle není vidět v nmap, ale pro jistotu)
+        ips = [ip for ip in ips if ip != '127.0.0.1']
+        return jsonify(ips)
+    except Exception as e:
+        return jsonify([f"Scan Error: {str(e)}"])
+
+
+@app.route('/api/port_scan/<ip>')
+def port_scan(ip):
+    if not session.get('logged_in'): return jsonify({"error": "Unauthorized"})
+    try:
+        # Rychlý sken top 100 nejběžnějších portů
+        cmd = f"nmap -F {ip}"
+        result = subprocess.check_output(cmd, shell=True).decode()
+        # Vytažení otevřených portů pomocí regexu (např. 80/tcp open http)
+        ports = re.findall(r'(\d+/tcp\s+open\s+\S+)', result)
+        return jsonify({"ip": ip, "open_ports": ports})
+    except Exception as e:
+        return jsonify({"ip": ip, "error": str(e)})
+
+
+@app.route('/generate_doc/<type>/<token>')
+def generate_doc(type, token):
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    emp = query_db("SELECT * FROM candidates WHERE token=?", (token,), one=True)
+    assets = query_db("SELECT name FROM assets WHERE owner_token=?", (token,))
+    comp = {"name": "Omega Enterprise s.r.o.", "address": "Technologická 1, Brno"}
+    
+    if not emp: return "Subjekt nenalezen", 404
+
+    try:
+        from fpdf import FPDF
+        import hashlib
+        from datetime import datetime, date
+        
+        pdf = FPDF()
+        pdf.add_font('Roboto', '', '/data/data/com.termux/files/home/OmegaPlatinum_PROD/fonts/System-Roboto.ttf')
+        pdf.add_page()
+        
+        # --- HEADER ---
+        pdf.set_font('Roboto', size=16)
+        titles = {
+            'protokol': 'PŘEDÁVACÍ PROTOKOL MAJETKU',
+            'dodatek': 'DODATEK Č. 1 K PRACOVNÍ SMLOUVĚ',
+            'vypoved': 'DOHODA O UKONČENÍ PRAC. POMĚRU'
+        }
+        pdf.cell(190, 15, text=titles.get(type, 'DOKUMENT OMEGA'), align='C', ln=True)
+        pdf.ln(10)
+
+        # --- BODY ---
+        pdf.set_font('Roboto', size=11)
+        name = emp['full_name_mojeid'] or emp['name']
+        
+        if type == 'protokol':
+            pdf.multi_cell(190, 7, text=f"Potvrzuji převzetí následujícího vybavení od společnosti {comp['name']}:")
+            pdf.ln(5)
+            for a in assets:
+                pdf.cell(190, 8, text=f"• {a['name']}", ln=True)
+            if not assets: pdf.cell(190, 8, text="Žádný majetek nebyl přiřazen.", ln=True)
+            
+        elif type == 'dodatek':
+            pdf.multi_cell(190, 7, text=f"Smluvní strany se dohodly na změně pracovní smlouvy subjektu {name}. Nové platové výměry a benefity vstupují v platnost k dnešnímu dni.")
+            
+        elif type == 'vypoved':
+            pdf.multi_cell(190, 7, text=f"Pracovní poměr mezi {comp['name']} a zaměstnancem {name} končí dohodou ke dni: {date.today()}")
+            pdf.ln(10)
+            pdf.multi_cell(190, 7, text="Zaměstnanec se zavazuje vrátit veškerý svěřený majetek nejpozději v den ukončení.")
+
+        # --- SIGNATURES ---
+        pdf.ln(30)
+        pdf.cell(95, 10, text="_______________________", align='C')
+        pdf.cell(95, 10, text="_______________________", align='C', ln=True)
+        pdf.cell(95, 10, text="Za Zaměstnavatele", align='C')
+        pdf.cell(95, 10, text="Zaměstnanec", align='C', ln=True)
+
+        # HASH FOR INTEGRITY
+        doc_hash = hashlib.sha256(f"{token}{type}{datetime.now()}".encode()).hexdigest()[:16]
+        pdf.set_font(size=7)
+        pdf.set_y(-20)
+        pdf.cell(190, 10, text=f"OMEGA SECURE ID: {doc_hash} | Verifikováno MojeID", align='C')
+
+        filename = f"{type}_{token}.pdf"
+        dest = os.path.join('/data/data/com.termux/files/home/OmegaPlatinum_PROD/contracts', filename)
+        pdf.output(dest)
+        return send_from_directory('/data/data/com.termux/files/home/OmegaPlatinum_PROD/contracts', filename)
+
+    except Exception as e:
+        return f"Chyba: {str(e)}", 500
+
+
+@app.route('/audit')
+def view_audit():
+    if session.get('role') != 'SUPERADMIN': return "Forbidden", 403
+    logs = query_db("SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT 100")
+    return render_template('audit.html', logs=logs)
+
+@app.route('/assets')
+def view_assets():
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    assets = query_db("SELECT * FROM assets")
+    return render_template('assets.html', assets=assets)
+
+@app.route('/api/add_asset', methods=['POST'])
+def add_asset():
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    name = request.form.get('name')
+    query_db("INSERT INTO assets (name, status) VALUES (?, 'IN_STOCK')", (name,))
+    log_action(session.get('user'), "ASSET_ADD", f"Added {name} to inventory")
+    return redirect(url_for('view_assets'))
+
+
+@app.route('/agenda')
+def view_agenda():
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    employees = query_db("SELECT * FROM candidates WHERE status='ACTIVE' OR status='signed'")
+    return render_template('agenda.html', employees=employees)
+
+@app.route('/api/update_agenda/<token>', methods=['POST'])
+def update_agenda(token):
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    ctype = request.form.get('contract_type')
+    sdate = request.form.get('start_date')
+    ostatus = request.form.get('onboarding_status')
+    query_db("UPDATE candidates SET contract_type=?, start_date=?, onboarding_status=? WHERE token=?", 
+             (ctype, sdate, ostatus, token))
+    log_action(session.get('user'), "AGENDA_UPDATE", f"Updated work info for {token}")
+    return redirect(url_for('view_agenda'))
+
+
+def run_hr_automation():
+    # 1. Automatické povýšení po verifikaci MojeID
+    # Pokud je ověřen a je ve stavu 'new', posuneme ho dál
+    query_db("UPDATE candidates SET status='VERIFIED' WHERE is_verified=1 AND status='new'")
+    
+    # 2. Kontrola integrity složek pro aktivní zaměstnance
+    active_emps = query_db("SELECT token FROM candidates WHERE status='ACTIVE'")
+    for emp in active_emps:
+        emp_path = f"/data/data/com.termux/files/home/OmegaPlatinum_PROD/work_vault/{emp['token']}"
+        if not os.path.exists(emp_path):
+            os.makedirs(emp_path)
+            # Vytvoření základního souboru agendy
+            with open(f"{emp_path}/profile.txt", 'w') as f:
+                f.write(f"OMEGA PROFILE: {emp['token']}\nCreated: {datetime.now()}")
+
+@app.before_request
+def auto_trigger():
+    # Spustí se při každé interakci s dashboardem, udržuje data v kondici
+    try: run_hr_automation()
+    except: pass
+
+@app.route('/api/finalize_onboarding/<token>')
+def finalize_onboarding(token):
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    
+    # Validace před aktivací
+    emp = query_db("SELECT * FROM candidates WHERE token=?", (token,), one=True)
+    assets = query_db("SELECT id FROM assets WHERE owner_token=?", (token,))
+    
+    if not emp['is_verified']:
+        return "❌ CHYBA: Nelze aktivovat neověřeného člena (MojeID missing).", 400
+    if not assets:
+        return "⚠️ VAROVÁNÍ: Člen nemá přiřazen žádný majetek. Chcete pokračovat?", 200 # Pro zjednodušení jen varování
+
+    query_db("UPDATE candidates SET status='ACTIVE', onboarding_status='READY' WHERE token=?", (token,))
+    log_action(session.get('user'), "AUTO_ONBOARD", f"Onboarding finalized for {token}")
+    return redirect(url_for('view_agenda'))
+
+
+@app.route('/generate_verified_contract/<token>')
+def generate_verified_contract(token):
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    emp = query_db("SELECT * FROM candidates WHERE token=?", (token,), one=True)
+    if not emp: return "Subjekt nenalezen", 404
+    
+    from fpdf import FPDF
+    import hashlib
+    pdf = FPDF()
+    pdf.add_font('Roboto', '', '/data/data/com.termux/files/home/OmegaPlatinum_PROD/fonts/System-Roboto.ttf')
+    pdf.add_page()
+    pdf.set_font('Roboto', size=16)
+    pdf.cell(190, 15, text="PRÁVNĚ OVĚŘENÁ SMLOUVA OMEGA", align='C', ln=True)
+    pdf.set_font('Roboto', size=10)
+    pdf.ln(10)
+    
+    # Právní data z MojeID
+    pdf.multi_cell(190, 8, text=f"Zaměstnanec: {emp['full_name_mojeid'] or emp['name']}\nBydliště: {emp['address_mojeid'] or 'Ověřeno v registru'}\nMojeID SUB: {emp['mojeid_sub'] or 'N/A'}")
+    pdf.ln(10)
+    pdf.multi_cell(190, 8, text="Tato smlouva je generována na základě úspěšné verifikace identity skrze systém MojeID.")
+    
+    doc_hash = hashlib.sha256(f"{token}{datetime.now()}".encode()).hexdigest()
+    pdf.set_y(-20)
+    pdf.set_font(size=7)
+    pdf.cell(190, 10, text=f"DIGITÁLNÍ PEČEŤ: {doc_hash}", align='C')
+    
+    filename = f"Kontrakt_VERIFIED_{token}.pdf"
+    pdf.output(os.path.join('/data/data/com.termux/files/home/OmegaPlatinum_PROD/contracts', filename))
+    return send_from_directory('/data/data/com.termux/files/home/OmegaPlatinum_PROD/contracts', filename)
+
+
+@app.route('/api/assign_asset', methods=['POST'])
+def assign_asset():
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    token = request.form.get('token')
+    asset_id = request.form.get('asset_id')
+    query_db("UPDATE assets SET owner_token=?, status='ASSIGNED' WHERE id=?", (token, asset_id))
+    log_action(session.get('user'), "ASSET_ASSIGN", f"Asset {asset_id} assigned to {token}")
+    return redirect(request.referrer)
+
+@app.route('/api/unassign_asset/<int:asset_id>')
+def unassign_asset(asset_id):
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    query_db("UPDATE assets SET owner_token=NULL, status='IN_STOCK' WHERE id=?", (asset_id,))
+    return redirect(request.referrer)
+
+
+@app.route('/api/security_audit_check')
+def security_audit_check():
+    # Vazba: Network + Assets -> Bezpečnostní audit
+    # Zjistí, zda jsou v síti zařízení, která nejsou v evidenci majetku
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    
+    # Simulace porovnání LAN Reaperu a Assets
+    known_ips = [a['last_ip'] for a in query_db("SELECT last_ip FROM assets WHERE last_ip IS NOT NULL")]
+    # Zde by byl skutečný scan, pro ukázku simulujeme detekci
+    alert = "Integrita sítě: Všechna zařízení v evidenci."
+    return {"status": "safe", "msg": alert}
+
+@app.route('/api/terminate_contract/<token>')
+def terminate_contract(token):
+    # Vazba: HR -> Assets + Audit
+    # Totální vyvázání zaměstnance
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    
+    # 1. Uvolnění veškerého majetku
+    query_db("UPDATE assets SET owner_token=NULL, status='RETURNED' WHERE owner_token=?", (token,))
+    # 2. Změna stavu v HR
+    query_db("UPDATE candidates SET status='TERMINATED', onboarding_status='ARCHIVED' WHERE token=?", (token,))
+    # 3. Záznam do auditní stopy
+    log_action(session.get('user'), "TERMINATION", f"Full termination of {token}. Assets reclaimed.")
+    
+    return redirect(url_for('view_agenda'))
+
+@app.route('/api/update_finance', methods=['POST'])
+def update_finance():
+    # Vazba: HR -> Finance
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    token = request.form.get('token')
+    salary = request.form.get('salary')
+    query_db("UPDATE candidates SET salary_base=? WHERE token=?", (salary, token))
+    return redirect(request.referrer)
+
+
+@app.route('/admin/identities')
+def manage_identities():
+    if not session.get('logged_in') or session.get('role') != 'SUPERADMIN':
+        return redirect(url_for('login'))
+    users = query_db("SELECT token, name, full_name_mojeid, is_verified, mojeid_sub FROM candidates")
+    return render_template('admin_identities.html', users=users)
+
+@app.route('/admin/reset_identity/<token>')
+def reset_identity(token):
+    if not session.get('logged_in') or session.get('role') != 'SUPERADMIN':
+        return redirect(url_for('login'))
+    
+    # GDPR PURGE: Smazání citlivých dat a unikátního MojeID klíče
+    query_db("""
+        UPDATE candidates 
+        SET is_verified = 0, 
+            mojeid_sub = NULL, 
+            full_name_mojeid = NULL, 
+            address_mojeid = NULL, 
+            birthdate_mojeid = NULL,
+            onboarding_status = 'RE-VERIFICATION_REQUIRED'
+        WHERE token = ?
+    """, (token,))
+    
+    log_action(session.get('user'), "GDPR_PURGE", f"Identity linkage removed for {token}. Sensitive data erased.")
+    return redirect(url_for('manage_identities'))
+
+
+# --- MODUL A: GDPR SELF-SERVICE ---
+@app.route('/my_data/<token>')
+def gdpr_self_service(token):
+    user_data = query_db("SELECT * FROM candidates WHERE token=?", (token,), one=True)
+    if not user_data: return "Access Denied", 403
+    return render_template('gdpr_export.html', u=user_data)
+
+# --- MODUL B: DIGITAL SIGNATURE (HASHING) ---
+@app.route('/api/sign_contract/<token>')
+def sign_contract(token):
+    import hashlib
+    user = query_db("SELECT * FROM candidates WHERE token=?", (token,), one=True)
+    # Simulace digitálního podpisu vytvořením hashe z dat a timestampu
+    sig_data = f"{user['name']}-{user['mojeid_sub']}-{datetime.now()}"
+    contract_hash = hashlib.sha256(sig_data.encode()).hexdigest()
+    query_db("UPDATE candidates SET contract_hash=?, status='CONTRACT_SIGNED' WHERE token=?", (contract_hash, token))
+    log_action("SYSTEM", "CONTRACT_SIGNED", f"Contract for {token} digitally hashed: {contract_hash[:10]}...")
+    return redirect(request.referrer)
+
+# --- MODUL C: FINANCIAL ANALYTICS ---
+@app.route('/admin/finance')
+def financial_dashboard():
+    if not session.get('logged_in'): return redirect(url_for('login'))
+    employees = query_db("SELECT name, salary_base, tax_rate, insurance_rate FROM candidates WHERE status='ACTIVE' OR status='CONTRACT_SIGNED'")
+    stats = []
+    total_cost = 0
+    for e in employees:
+        sal = float(e['salary_base'] or 0)
+        tax = sal * e['tax_rate']
+        ins = sal * e['insurance_rate']
+        netto = sal - tax - ins
+        stats.append({'name': e['name'], 'brutto': sal, 'netto': netto, 'cost': sal * 1.34}) # Superhrubá simulace
+        total_cost += sal * 1.34
+    return render_template('finance_admin.html', stats=stats, total=total_cost)
+
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=8080)
